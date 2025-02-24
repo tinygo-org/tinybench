@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+// See https://github.com/golang/go/issues/70644
 func main() {
 	var size int
 	flag.IntVar(&size, "s", 512, "Size of RSA key in bits")
