@@ -1,0 +1,105 @@
+package tinybench
+
+import (
+	"bytes"
+	"os"
+	"os/exec"
+	"strings"
+	"testing"
+)
+
+func BenchmarkAll(b *testing.B) {
+	benchnames := setup()
+	b.Logf("looking for benchmarks in %v", benchnames)
+	for _, testname := range benchnames {
+		argdata, err := os.ReadFile(testname + "/args.txt")
+		casesJoined := strings.TrimSpace(string(argdata))
+		if err != nil || len(argdata) == 0 {
+			b.Fatalf("%s is missing arguments file 'args.txt' or empty(%d): %s", testname, len(argdata), err)
+		}
+		cases := strings.Split(casesJoined, "\n")
+		_, errGo := os.Stat(testname + "/go")
+		_, errC := os.Stat(testname + "/c")
+		for i := range cases {
+			arginput := strings.Split(cases[i], " ")
+			b.Run(testname+cases[i], func(b *testing.B) {
+
+				// GO PROGRAM.
+				if errGo == nil {
+					out, err := exec.Command("go", "build", "-o=go.bin", "./"+testname+"/go").CombinedOutput()
+					if err != nil {
+						b.Fatalf("building go: %s", out)
+					}
+					out, err = exec.Command("tinygo", "build", "-o=tinygo", "./"+testname+"/go").CombinedOutput()
+					if err != nil {
+						b.Fatalf("building tinygo: %s", out)
+					}
+
+					// GO COMPILER.
+					b.Run("go", func(b *testing.B) {
+						for i := 0; i < b.N; i++ {
+							err = exec.Command("./go.bin", arginput...).Run()
+							if err != nil {
+								b.Fatalf("running go: %s", err)
+							}
+						}
+					})
+
+					// TINYGO COMPILER.
+					b.Run("tinygo", func(b *testing.B) {
+						for i := 0; i < b.N; i++ {
+							err = exec.Command("./tinygo", arginput...).Run()
+							if err != nil {
+								b.Errorf("running tinygo: %s", err)
+								b.Skip() // Maybe tinygo not compile?
+							}
+						}
+					})
+				}
+
+				// C PROGRAM.
+				if errC == nil {
+					args := strings.Split(gccFlags[testname], " ")
+					out, err := exec.Command("gcc", args...).CombinedOutput()
+					if err != nil {
+						b.Fatalf("building go: %s", out)
+					}
+					b.Run("c", func(b *testing.B) {
+						for i := 0; i < b.N; i++ {
+							err = exec.Command("./c.bin", arginput...).Run()
+							if err != nil {
+								b.Errorf("running c: %s", err)
+							}
+						}
+					})
+				}
+			})
+		}
+	}
+}
+
+func setup() (benchnames []string) {
+	fatal := func(msg string) {
+		os.Stderr.WriteString(msg)
+		os.Exit(1)
+	}
+	data, _ := os.ReadFile("go.mod")
+	if !bytes.HasPrefix(data, []byte("module tinybench")) {
+		fatal("run `go test` from root directory")
+
+	}
+	dirs, err := os.ReadDir(".")
+	if err != nil {
+		fatal(err.Error())
+	}
+	for _, dir := range dirs {
+		if dir.IsDir() {
+			name := dir.Name()
+			if strings.ContainsAny(name, "._") {
+				continue // skip
+			}
+			benchnames = append(benchnames, name)
+		}
+	}
+	return benchnames
+}
