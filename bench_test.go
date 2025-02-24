@@ -59,7 +59,11 @@ func BenchmarkAll(b *testing.B) {
 
 				// C PROGRAM.
 				if errC == nil {
-					args := strings.Split(gccFlags[testname], " ")
+					flags, ok := gccFlags[testname]
+					if !ok {
+						b.Fatalf("please add %s entry to gccFlags variable", testname)
+					}
+					args := strings.Split(flags, " ")
 					out, err := exec.Command("gcc", args...).CombinedOutput()
 					if err != nil {
 						b.Fatalf("building go: %s", out)
