@@ -14,15 +14,17 @@ func BenchmarkAll(b *testing.B) {
 	for _, testname := range benchnames {
 		argdata, err := os.ReadFile(testname + "/args.txt")
 		casesJoined := strings.TrimSpace(string(argdata))
-		if err != nil || len(argdata) == 0 {
-			b.Fatalf("%s is missing arguments file 'args.txt' or empty(%d): %s", testname, len(argdata), err)
+		if len(argdata) == 0 {
+			b.Fatalf("%s has empty 'args.txt' file", testname)
+		} else if err != nil {
+			b.Fatalf("%s failed open arguments file 'args.txt': %s", testname, err)
 		}
 		cases := strings.Split(casesJoined, "\n")
 		_, errGo := os.Stat(testname + "/go")
 		_, errC := os.Stat(testname + "/c")
 		for i := range cases {
 			arginput := strings.Split(cases[i], " ")
-			b.Run(testname+cases[i], func(b *testing.B) {
+			b.Run(testname+":args="+cases[i], func(b *testing.B) {
 
 				// GO PROGRAM.
 				if errGo == nil {
@@ -66,7 +68,7 @@ func BenchmarkAll(b *testing.B) {
 					args := strings.Split(flags, " ")
 					out, err := exec.Command("gcc", args...).CombinedOutput()
 					if err != nil {
-						b.Fatalf("building go: %s", out)
+						b.Fatalf("building with gcc: %s", out)
 					}
 					b.Run("c", func(b *testing.B) {
 						for i := 0; i < b.N; i++ {
