@@ -26,44 +26,56 @@ goos: linux
 goarch: amd64
 pkg: tinybench
 cpu: 12th Gen Intel(R) Core(TM) i5-12400F
-BenchmarkAll/fannkuch-redux:args=4/go-12            2934           1256050 ns/op
-BenchmarkAll/fannkuch-redux:args=4/tinygo-12        4084            479744 ns/op
-BenchmarkAll/fannkuch-redux:args=4/c-12             5589           1409489 ns/op
-BenchmarkAll/fannkuch-redux:args=8/go-12             190           7512802 ns/op
-BenchmarkAll/fannkuch-redux:args=8/tinygo-12         264           6939621 ns/op
-BenchmarkAll/fannkuch-redux:args=8/c-12              246           6902765 ns/op
-BenchmarkAll/fannkuch-redux:args=10/go-12              7         154386257 ns/op
-BenchmarkAll/fannkuch-redux:args=10/tinygo-12          7         154125962 ns/op
-BenchmarkAll/fannkuch-redux:args=10/c-12               6         194099105 ns/op
-BenchmarkAll/n-body:args=50000/go-12                 154           8137065 ns/op
-BenchmarkAll/n-body:args=50000/tinygo-12             228           8293582 ns/op
-BenchmarkAll/n-body:args=50000/c-12                  412           3389684 ns/op
-BenchmarkAll/n-body:args=100000/go-12                134           9535106 ns/op
-BenchmarkAll/n-body:args=100000/tinygo-12            181           7984095 ns/op
-BenchmarkAll/n-body:args=100000/c-12                 162           6381976 ns/op
-BenchmarkAll/n-body:args=1000000/go-12                18          63545177 ns/op
-BenchmarkAll/n-body:args=1000000/tinygo-12            26          45244885 ns/op
-BenchmarkAll/n-body:args=1000000/c-12                 30          38117632 ns/op
-BenchmarkAll/n-body-nosqrt:args=50000/go-12           79          14999125 ns/op
-BenchmarkAll/n-body-nosqrt:args=50000/tinygo-12                       93          12611197 ns/op
-BenchmarkAll/n-body-nosqrt:args=50000/c-12                           100          12458944 ns/op
-BenchmarkAll/n-body-nosqrt:args=100000/go-12                          39          29244188 ns/op
-BenchmarkAll/n-body-nosqrt:args=100000/tinygo-12                      48          24458389 ns/op
-BenchmarkAll/n-body-nosqrt:args=100000/c-12                           49          23534435 ns/op
-BenchmarkAll/n-body-nosqrt:args=1000000/go-12                          4         287893191 ns/op
-BenchmarkAll/n-body-nosqrt:args=1000000/tinygo-12                      5         243552483 ns/op
-BenchmarkAll/n-body-nosqrt:args=1000000/c-12                           5         232477478 ns/op
-BenchmarkAll/rsa-keygen:args=-s_512/go-12                            237           5636486 ns/op
-BenchmarkAll/rsa-keygen:args=-s_512/tinygo-12                        207           5480214 ns/op
-BenchmarkAll/rsa-keygen:args=-s_512/c-12                             297           4836271 ns/op
-BenchmarkAll/rsa-keygen:args=-s_1024/go-12                           100          14437702 ns/op
-BenchmarkAll/rsa-keygen:args=-s_1024/tinygo-12                        28          36936543 ns/op
-BenchmarkAll/rsa-keygen:args=-s_1024/c-12                            128           9146223 ns/op
-BenchmarkAll/rsa-keygen:args=-s_2048/go-12                            18          93172762 ns/op
-BenchmarkAll/rsa-keygen:args=-s_2048/tinygo-12                         3         694935808 ns/op
-BenchmarkAll/rsa-keygen:args=-s_2048/c-12                             31          37147406 ns/op
+BenchmarkAll/fannkuch-redux:args=4/go-12            1689           1761810 ns/op
+BenchmarkAll/fannkuch-redux:args=4/tinygo-12        4015            462891 ns/op
+BenchmarkAll/fannkuch-redux:args=4/C_gcc-12         4515            926869 ns/op
+BenchmarkAll/fannkuch-redux:args=4/clang-12         3184           1408976 ns/op
+BenchmarkAll/fannkuch-redux:args=8/go-12             319           4811605 ns/op
+BenchmarkAll/fannkuch-redux:args=8/tinygo-12         368           3644272 ns/op
+BenchmarkAll/fannkuch-redux:args=8/C_gcc-12          303           3598200 ns/op
+BenchmarkAll/fannkuch-redux:args=8/clang-12          390           2722773 ns/op
+BenchmarkAll/fannkuch-redux:args=10/go-12              6         167180506 ns/op
+BenchmarkAll/fannkuch-redux:args=10/tinygo-12          7         163017421 ns/op
+BenchmarkAll/fannkuch-redux:args=10/C_gcc-12           5         203131712 ns/op
+BenchmarkAll/fannkuch-redux:args=10/clang-12           6         170950045 ns/op
+BenchmarkAll/n-body:args=50000/go-12                 175           6997592 ns/op
+BenchmarkAll/n-body:args=50000/tinygo-12             339           4332278 ns/op
+BenchmarkAll/n-body:args=50000/C_gcc-12              382           3491287 ns/op
+BenchmarkAll/n-body:args=50000/clang-12              357           3373237 ns/op
+BenchmarkAll/n-body:args=100000/go-12                133           9573734 ns/op
+BenchmarkAll/n-body:args=100000/tinygo-12            200           5378470 ns/op
+BenchmarkAll/n-body:args=100000/C_gcc-12             228           5322187 ns/op
+BenchmarkAll/n-body:args=100000/clang-12             234           4981824 ns/op
+BenchmarkAll/n-body:args=1000000/go-12                16          67614088 ns/op
+BenchmarkAll/n-body:args=1000000/tinygo-12            25          47178324 ns/op
+BenchmarkAll/n-body:args=1000000/C_gcc-12             30          39153560 ns/op
+BenchmarkAll/n-body:args=1000000/clang-12             30          39798239 ns/op
+BenchmarkAll/n-body-nosqrt:args=50000/go-12           73          15274763 ns/op
+BenchmarkAll/n-body-nosqrt:args=50000/tinygo-12                       81          12735334 ns/op
+BenchmarkAll/n-body-nosqrt:args=50000/C_gcc-12                        97          12367592 ns/op
+BenchmarkAll/n-body-nosqrt:args=50000/clang-12                        88          12445516 ns/op
+BenchmarkAll/n-body-nosqrt:args=100000/go-12                          40          29376413 ns/op
+BenchmarkAll/n-body-nosqrt:args=100000/tinygo-12                      45          24916553 ns/op
+BenchmarkAll/n-body-nosqrt:args=100000/C_gcc-12                       50          24428093 ns/op
+BenchmarkAll/n-body-nosqrt:args=100000/clang-12                       49          24357044 ns/op
+BenchmarkAll/n-body-nosqrt:args=1000000/go-12                          4         288958087 ns/op
+BenchmarkAll/n-body-nosqrt:args=1000000/tinygo-12                      5         245972148 ns/op
+BenchmarkAll/n-body-nosqrt:args=1000000/C_gcc-12                       5         235981302 ns/op
+BenchmarkAll/n-body-nosqrt:args=1000000/clang-12                       5         235178796 ns/op
+BenchmarkAll/rsa-keygen:args=-s_512/go-12                            172           6350657 ns/op
+BenchmarkAll/rsa-keygen:args=-s_512/tinygo-12                        205           5466632 ns/op
+BenchmarkAll/rsa-keygen:args=-s_512/C_gcc-12                         252           4068652 ns/op
+BenchmarkAll/rsa-keygen:args=-s_512/clang-12                         290           4103585 ns/op
+BenchmarkAll/rsa-keygen:args=-s_1024/go-12                            88          13716162 ns/op
+BenchmarkAll/rsa-keygen:args=-s_1024/tinygo-12                        30          38450349 ns/op
+BenchmarkAll/rsa-keygen:args=-s_1024/C_gcc-12                        127           8914093 ns/op
+BenchmarkAll/rsa-keygen:args=-s_1024/clang-12                        136           9019343 ns/op
+BenchmarkAll/rsa-keygen:args=-s_2048/go-12                            14         100424873 ns/op
+BenchmarkAll/rsa-keygen:args=-s_2048/tinygo-12                         2         640627691 ns/op
+BenchmarkAll/rsa-keygen:args=-s_2048/C_gcc-12                         40          34515496 ns/op
+BenchmarkAll/rsa-keygen:args=-s_2048/clang-12                         55          38689188 ns/op
 PASS
-ok      tinybench       96.139s
+ok      tinybench       112.482s
 ```
 
 </details>

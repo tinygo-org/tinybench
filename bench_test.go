@@ -11,6 +11,7 @@ import (
 func BenchmarkAll(b *testing.B) {
 	benchnames := setup()
 	b.Logf("looking for benchmarks in %v", benchnames)
+	hasClang := exec.Command("clang", "--version").Run() == nil
 	for _, testname := range benchnames {
 		argdata, err := os.ReadFile(testname + "/args.txt")
 		casesJoined := strings.TrimSpace(string(argdata))
@@ -70,7 +71,7 @@ func BenchmarkAll(b *testing.B) {
 					if err != nil {
 						b.Fatalf("building with gcc: %s", out)
 					}
-					b.Run("c", func(b *testing.B) {
+					b.Run("C gcc", func(b *testing.B) {
 						for i := 0; i < b.N; i++ {
 							err = exec.Command("./c.bin", arginput...).Run()
 							if err != nil {
@@ -78,6 +79,20 @@ func BenchmarkAll(b *testing.B) {
 							}
 						}
 					})
+					if hasClang {
+						out, err := exec.Command("clang", args...).CombinedOutput()
+						if err != nil {
+							b.Fatalf("building with clang: %s", out)
+						}
+						b.Run("clang", func(b *testing.B) {
+							for i := 0; i < b.N; i++ {
+								err = exec.Command("./c.bin", arginput...).Run()
+								if err != nil {
+									b.Errorf("running c: %s", err)
+								}
+							}
+						})
+					}
 				}
 			})
 		}
