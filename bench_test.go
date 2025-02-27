@@ -33,7 +33,8 @@ func BenchmarkAll(b *testing.B) {
 					if err != nil {
 						b.Fatalf("building go: %s", out)
 					}
-					out, err = exec.Command("tinygo", "build", "-o=tinygo", "./"+testname+"/go").CombinedOutput()
+					// opt=2 optimizes for performance.
+					out, err = exec.Command("tinygo", "build", "-o=tinygo", "-opt=2", "./"+testname+"/go").CombinedOutput()
 					if err != nil {
 						b.Fatalf("building tinygo: %s", out)
 					}
@@ -62,9 +63,12 @@ func BenchmarkAll(b *testing.B) {
 
 				// C PROGRAM.
 				if errC == nil {
+					// gccFlags should have -O2 to optimize for speed.
 					flags, ok := gccFlags[testname]
 					if !ok {
 						b.Fatalf("please add %s entry to gccFlags variable", testname)
+					} else if !strings.Contains(flags, "-O2") {
+						b.Fatalf("please add '-O2' to gccFlags for test %s", testname)
 					}
 					args := strings.Split(flags, " ")
 					out, err := exec.Command("gcc", args...).CombinedOutput()
