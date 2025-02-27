@@ -63,12 +63,12 @@ func BenchmarkAll(b *testing.B) {
 
 				// C PROGRAM.
 				if errC == nil {
-					// gccFlags should have -O2 to optimize for speed.
+					// gccFlags should have -O3 to optimize for speed.
 					flags, ok := gccFlags[testname]
 					if !ok {
 						b.Fatalf("please add %s entry to gccFlags variable", testname)
-					} else if !strings.Contains(flags, "-O2") {
-						b.Fatalf("please add '-O2' to gccFlags for test %s", testname)
+					} else if !strings.Contains(flags, "-O3") {
+						b.Fatalf("please add '-O3' to gccFlags for test %s", testname)
 					}
 					args := strings.Split(flags, " ")
 					out, err := exec.Command("gcc", args...).CombinedOutput()
@@ -88,7 +88,7 @@ func BenchmarkAll(b *testing.B) {
 						if err != nil {
 							b.Fatalf("building with clang: %s", out)
 						}
-						b.Run("clang", func(b *testing.B) {
+						b.Run("C clang", func(b *testing.B) {
 							for i := 0; i < b.N; i++ {
 								err = exec.Command("./c.bin", arginput...).Run()
 								if err != nil {
