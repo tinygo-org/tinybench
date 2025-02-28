@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -19,13 +20,33 @@ import (
 )
 
 func main() {
-	var output string
+	var output, baseLang string
 	flag.StringVar(&output, "o", "benchmark.png", "Output file")
+	flag.StringVar(&baseLang, "base", "tinygo", "Language benchmark to normalize other benchmark timings with")
 	flag.Parse()
-	langs, err := parsebench(os.Stdin)
+	langs, err := parsebench(os.Stdin, baseLang)
 	if err != nil {
 		log.Fatal(err)
 	}
+	err = drawBenchmark(langs, output, baseLang)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for i := range langs {
+		for j := range langs[i].Results {
+			if langs[i].Results[j].ID() == "fannkuch-redux args=4" {
+				langs[i].Results = slices.Delete(langs[i].Results, j, j+1)
+				break
+			}
+		}
+	}
+	err = drawBenchmark(langs, "omit_fk4_"+output, baseLang)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func drawBenchmark(langs []langBench, savefile, baseLang string) error {
 	var (
 		size     = 5 * vg.Inch * vg.Length(len(langs))
 		fontsize = size / 50
@@ -35,7 +56,7 @@ func main() {
 	p := plot.New()
 
 	p.Title.Text = "Compiler/language benchmark (lower is better)"
-	p.Y.Label.Text = "Average runtime (milliseconds)"
+	p.Y.Label.Text = "Average runtime normalized wrt " + baseLang + " (percent)"
 	p.Y.Tick.Label.Font.Size = fontsize
 
 	var plotters []plot.Plotter
@@ -49,7 +70,7 @@ func main() {
 	for i := range langs {
 		bar, err := plotter.NewBarChart(&langs[i], barwidth)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		bar.Width = barwidth
@@ -78,9 +99,10 @@ func main() {
 	p.Y.Label.TextStyle.Font.Size = fontsize
 	p.X.Label.TextStyle.Font.Size = fontsize
 	p.X.Label.Text = "Benchmark name"
-	if err := p.Save(size, size/2, output); err != nil {
-		panic(err)
+	if err := p.Save(size, size/2, savefile); err != nil {
+		return err
 	}
+	return nil
 }
 
 type langBench struct {
@@ -88,7 +110,7 @@ type langBench struct {
 	Results  []benchResult
 }
 
-func (lb *langBench) Value(i int) float64 { return lb.Results[i].PerOp.Seconds() * 1000 }
+func (lb *langBench) Value(i int) float64 { return lb.Results[i].PerOpNormalized * 100 }
 func (lb *langBench) Len() int            { return len(lb.Results) }
 
 type benchResult struct {
@@ -96,10 +118,17 @@ type benchResult struct {
 	Args  string
 	N     int
 	PerOp time.Duration
+	// PerOpNormalized is calculated as PerOp/PerOp_baseLang
+	PerOpNormalized float64
 }
 
-func parsebench(r io.Reader) (langs []langBench, err error) {
+func (br benchResult) ID() string {
+	return br.Name + " " + br.Args
+}
+
+func parsebench(r io.Reader, baseLang string) (langs []langBench, err error) {
 	br := bufio.NewReader(r)
+	var base *langBench
 	for {
 		orig, rderr := br.ReadString('\n')
 		if !strings.HasPrefix(orig, "BenchmarkAll") {
@@ -144,6 +173,30 @@ func parsebench(r io.Reader) (langs []langBench, err error) {
 				Langname: langname,
 				Results:  []benchResult{result},
 			})
+		}
+	}
+	for i := range langs {
+		if baseLang == langs[i].Langname {
+			base = &langs[i]
+		}
+	}
+	if base == nil {
+		return langs, fmt.Errorf("language %q not found", baseLang)
+	}
+	for i := range langs {
+		for j := range langs[i].Results {
+			var baseOp float64 = -1
+			id := langs[i].Results[j].ID()
+			for jj := range base.Results {
+				if base.Results[jj].ID() == id {
+					baseOp = base.Results[jj].PerOp.Seconds()
+					break
+				}
+			}
+			if baseOp < 0 {
+				return langs, fmt.Errorf("failed to find %q benchmark among base language's benchmarks: %+v", id, base.Results)
+			}
+			langs[i].Results[j].PerOpNormalized = langs[i].Results[j].PerOp.Seconds() / baseOp
 		}
 	}
 	return langs, nil
