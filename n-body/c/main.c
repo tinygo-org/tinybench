@@ -15,9 +15,9 @@
 #define days_per_year 365.24
 
 struct planet {
-double x, y, z;
-double vx, vy, vz;
-double mass;
+    double x, y, z;
+    double vx, vy, vz;
+    double mass;
 };
 
 void advance(int nbodies, struct planet * bodies, double dt)
@@ -52,23 +52,23 @@ void advance(int nbodies, struct planet * bodies, double dt)
 
 double energy(int nbodies, struct planet * bodies)
 {
-double e;
-int i, j;
+    double e;
+    int i, j;
 
-e = 0.0;
-for (i = 0; i < nbodies; i++) {
-    struct planet * b = &(bodies[i]);
-    e += 0.5 * b->mass * (b->vx * b->vx + b->vy * b->vy + b->vz * b->vz);
-    for (j = i + 1; j < nbodies; j++) {
-    struct planet * b2 = &(bodies[j]);
-    double dx = b->x - b2->x;
-    double dy = b->y - b2->y;
-    double dz = b->z - b2->z;
-    double distance = sqrt(dx * dx + dy * dy + dz * dz);
-    e -= (b->mass * b2->mass) / distance;
+    e = 0.0;
+    for (i = 0; i < nbodies; i++) {
+        struct planet * b = &(bodies[i]);
+        e += 0.5 * b->mass * (b->vx * b->vx + b->vy * b->vy + b->vz * b->vz);
+        for (j = i + 1; j < nbodies; j++) {
+            struct planet * b2 = &(bodies[j]);
+            double dx = b->x - b2->x;
+            double dy = b->y - b2->y;
+            double dz = b->z - b2->z;
+            double distance = sqrt(dx * dx + dy * dy + dz * dz);
+            e -= (b->mass * b2->mass) / distance;
+        }
     }
-}
-return e;
+    return e;
 }
 
 void offset_momentum(int nbodies, struct planet * bodies)

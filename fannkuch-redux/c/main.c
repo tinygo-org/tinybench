@@ -12,48 +12,51 @@
 /* this depends highly on the platform.  It might be faster to use
    char type on 32-bit systems; it might be faster to use unsigned. */
 
+
 typedef int elem;
 
-elem s[16], t[16];
+typedef struct {
+   elem s[16];
+   elem t[16];
+   int maxflips;
+   int max_n;
+   int odd;
+   int checksum;
+} pfannkuch;
 
-int maxflips = 0;
-int max_n;
-int odd = 0;
-int checksum = 0;
-
-int flip()
+int flip(pfannkuch* pf)
 {
    register int i;
    register elem *x, *y, c;
 
-   for (x = t, y = s, i = max_n; i--; )
+   for (x = pf->t, y = pf->s, i = pf->max_n; i--; )
       *x++ = *y++;
    i = 1;
    do {
-      for (x = t, y = t + t[0]; x < y; )
+      for (x = pf->t, y = pf->t + pf->t[0]; x < y; )
          c = *x, *x++ = *y, *y-- = c;
       i++;
-   } while (t[t[0]]);
+   } while (pf->t[pf->t[0]]);
    return i;
 }
 
-void rotate(int n)
+void rotate(pfannkuch* pf, int n)
 {
    elem c;
    register int i;
-   c = s[0];
-   for (i = 1; i <= n; i++) s[i-1] = s[i];
-   s[n] = c;
+   c = pf->s[0];
+   for (i = 1; i <= n; i++) pf->s[i-1] = pf->s[i];
+   pf->s[n] = c;
 }
 
 /* Tompkin-Paige iterative perm generation */
-void tk(int n)
+void tk(pfannkuch* pf)
 {
    int i = 0, f;
    elem c[16] = {0};
-
+   int n = pf->max_n;
    while (i < n) {
-      rotate(i);
+      rotate(pf, i);
       if (c[i] >= i) {
          c[i++] = 0;
          continue;
@@ -61,11 +64,11 @@ void tk(int n)
 
       c[i]++;
       i = 1;
-      odd = ~odd;
-      if (*s) {
-         f = s[s[0]] ? flip() : 1;
-         if (f > maxflips) maxflips = f;
-         checksum += odd ? -f : f;
+      pf->odd = ~pf->odd;
+      if (*pf->s) {
+         f = pf->s[pf->s[0]] ? flip(pf) : 1;
+         if (f > pf->maxflips) pf->maxflips = f;
+         pf->checksum += pf->odd ? -f : f;
       }
    }
 }
@@ -78,17 +81,17 @@ int main(int argc, char **v)
       fprintf(stderr, "usage: %s number\n", v[0]);
       exit(1);
    }
-
-   max_n = atoi(v[1]);
-   if (max_n < 3 || max_n > 15) {
+   pfannkuch pf = {};
+   pf.max_n = atoi(v[1]);
+   if ( pf.max_n < 3 || pf.max_n > 15) {
       fprintf(stderr, "range: must be 3 <= n <= 12\n");
       exit(1);
    }
 
-   for (i = 0; i < max_n; i++) s[i] = i;
-   tk(max_n);
+   for (i = 0; i < pf.max_n; i++) pf.s[i] = i;
+   tk(&pf);
 
-   printf("%d\nPfannkuchen(%d) = %d\n", checksum, max_n, maxflips);
+   printf("%d\nPfannkuchen(%d) = %d\n", pf.checksum, pf.max_n, pf.maxflips);
 
    return 0;
 }

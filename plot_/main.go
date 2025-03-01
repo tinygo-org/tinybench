@@ -35,9 +35,11 @@ func main() {
 
 func drawBenchmark(langs []langBench, savefile, baseLang string) error {
 	var (
-		size     = 5 * vg.Inch * vg.Length(len(langs))
-		fontsize = size / 50
-		barwidth = size / 60
+		plotHeight = 10 * vg.Inch
+		plotWidth  = plotHeight * vg.Length(len(langs)) / 2
+
+		fontsize = plotHeight / 50
+		barwidth = plotHeight / 35
 	)
 
 	p := plot.New()
@@ -48,11 +50,11 @@ func drawBenchmark(langs []langBench, savefile, baseLang string) error {
 
 	var plotters []plot.Plotter
 	var colors = map[string]color.Color{
-		"go":      plotutil.Color(2),
-		"tinygo":  plotutil.Color(1),
-		"C clang": plotutil.Color(4),
-		"C gcc":   plotutil.Color(0),
-		"zig":     plotutil.Color(3), // hopefully added someday.
+		"go":      plotutil.Color(2), // Blue: Gophers.
+		"tinygo":  plotutil.Color(1), // Green: for the color of the PCBs this runs on.
+		"C gcc":   plotutil.Color(0), // Red: for blood of developers spilt.
+		"C clang": plotutil.Color(4), // Violet: for "roses are red, violets are blue, clobbered register #32".
+		"zig":     plotutil.Color(3), // Orange: for Zig go brrr.
 	}
 	for i := range langs {
 		bar, err := plotter.NewBarChart(&langs[i], barwidth)
@@ -86,7 +88,7 @@ func drawBenchmark(langs []langBench, savefile, baseLang string) error {
 	p.Y.Label.TextStyle.Font.Size = fontsize
 	p.X.Label.TextStyle.Font.Size = fontsize
 	p.X.Label.Text = "Benchmark name"
-	if err := p.Save(size, size/2, savefile); err != nil {
+	if err := p.Save(plotWidth, plotHeight, savefile); err != nil {
 		return err
 	}
 	return nil

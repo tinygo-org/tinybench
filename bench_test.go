@@ -13,6 +13,7 @@ func BenchmarkAll(b *testing.B) {
 	benchnames := setup()
 	b.Logf("looking for benchmarks in %v", benchnames)
 	hasClang := exec.Command("clang", "--version").Run() == nil
+	hasZig := exec.Command("zig", "version").Run() == nil
 	for _, testname := range benchnames {
 		argdata, err := os.ReadFile(testname + "/args.txt")
 		casesJoined := strings.TrimSpace(string(argdata))
@@ -24,6 +25,7 @@ func BenchmarkAll(b *testing.B) {
 		cases := strings.Split(casesJoined, "\n")
 		_, errGo := os.Stat(testname + "/go")
 		_, errC := os.Stat(testname + "/c")
+		_, errZig := os.Stat(testname + "/zig")
 		for i := range cases {
 			arginput := strings.Split(cases[i], " ")
 			b.Run(testname+":args="+cases[i], func(b *testing.B) {
@@ -55,6 +57,12 @@ func BenchmarkAll(b *testing.B) {
 						runCompileAndBench(b, "C clang", "clang", "./c.bin", args, arginput)
 					}
 				}
+
+				// ZIG LANGUAGE BENCHMARKS.
+				if hasZig && errZig == nil {
+					compilerFlags := append(zigBaseFlags, "./"+testname+"/zig/main.zig")
+					runCompileAndBench(b, "zig", "zig", "./zig.bin", compilerFlags, arginput)
+				}
 			})
 			if b.Failed() {
 				b.FailNow() // Don't keep going if error encountered to avoid error spam on all benchmarks.
@@ -67,7 +75,7 @@ func runCompileAndBench(b *testing.B, name, compiler, outputBinary string, compi
 	b.Helper()
 	out, err := exec.Command(compiler, compilerFlags...).CombinedOutput()
 	if err != nil {
-		b.Fatalf("%s: building with %s:\n%s", name, compiler, out)
+		b.Fatalf("%s: building with %s flags=%v:\n%s", name, compilerFlags, compiler, out)
 	}
 	runBench(b, name, outputBinary, programFlags)
 }
