@@ -2,6 +2,7 @@ package tinybench
 
 import (
 	"bytes"
+	"errors"
 	"os"
 	"os/exec"
 	"strings"
@@ -26,42 +27,16 @@ func BenchmarkAll(b *testing.B) {
 		for i := range cases {
 			arginput := strings.Split(cases[i], " ")
 			b.Run(testname+":args="+cases[i], func(b *testing.B) {
-
-				// GO PROGRAM.
+				// GO LANGUAGE BENCHMARKS.
 				if errGo == nil {
-					out, err := exec.Command("go", "build", "-o=go.bin", "./"+testname+"/go").CombinedOutput()
-					if err != nil {
-						b.Fatalf("building go: %s", out)
-					}
-					// opt=2 optimizes for performance.
-					out, err = exec.Command("tinygo", "build", "-o=tinygo", "-opt=2", "./"+testname+"/go").CombinedOutput()
-					if err != nil {
-						b.Fatalf("building tinygo: %s", out)
-					}
+					// UPSTREAM GO BENCHMARK.
+					runCompileAndBench(b, "go", "go", "./go.bin", []string{"build", "-o=go.bin", "./" + testname + "/go"}, arginput)
 
-					// GO COMPILER.
-					b.Run("go", func(b *testing.B) {
-						for i := 0; i < b.N; i++ {
-							err = exec.Command("./go.bin", arginput...).Run()
-							if err != nil {
-								b.Fatalf("running go: %s", err)
-							}
-						}
-					})
-
-					// TINYGO COMPILER.
-					b.Run("tinygo", func(b *testing.B) {
-						for i := 0; i < b.N; i++ {
-							err = exec.Command("./tinygo", arginput...).Run()
-							if err != nil {
-								b.Errorf("running tinygo: %s", err)
-								b.Skip() // Maybe tinygo not compile?
-							}
-						}
-					})
+					// TINYGO BENCHMARK.
+					runCompileAndBench(b, "tinygo", "tinygo", "./tinygo", []string{"build", "-o=tinygo", "-opt=2", "./" + testname + "/go"}, arginput)
 				}
 
-				// C PROGRAM.
+				// C LANGUAGE BENCHMARKS.
 				if errC == nil {
 					// gccFlags should have -O3 to optimize for speed.
 					flags, ok := gccFlags[testname]
@@ -71,36 +46,50 @@ func BenchmarkAll(b *testing.B) {
 						b.Fatalf("please add '-O3' to gccFlags for test %s", testname)
 					}
 					args := strings.Split(flags, " ")
-					out, err := exec.Command("gcc", args...).CombinedOutput()
-					if err != nil {
-						b.Fatalf("building with gcc: %s", out)
-					}
-					b.Run("C gcc", func(b *testing.B) {
-						for i := 0; i < b.N; i++ {
-							err = exec.Command("./c.bin", arginput...).Run()
-							if err != nil {
-								b.Errorf("running c: %s", err)
-							}
-						}
-					})
+
+					// GCC COMPILER BENCHMARK.
+					runCompileAndBench(b, "C gcc", "gcc", "./c.bin", args, arginput)
+
 					if hasClang {
-						out, err := exec.Command("clang", args...).CombinedOutput()
-						if err != nil {
-							b.Fatalf("building with clang: %s", out)
-						}
-						b.Run("C clang", func(b *testing.B) {
-							for i := 0; i < b.N; i++ {
-								err = exec.Command("./c.bin", arginput...).Run()
-								if err != nil {
-									b.Errorf("running c: %s", err)
-								}
-							}
-						})
+						// CLANG COMPILER BENCHMARK.
+						runCompileAndBench(b, "C clang", "clang", "./c.bin", args, arginput)
 					}
 				}
 			})
+			if b.Failed() {
+				b.FailNow() // Don't keep going if error encountered to avoid error spam on all benchmarks.
+			}
 		}
 	}
+}
+
+func runCompileAndBench(b *testing.B, name, compiler, outputBinary string, compilerFlags, programFlags []string) {
+	b.Helper()
+	out, err := exec.Command(compiler, compilerFlags...).CombinedOutput()
+	if err != nil {
+		b.Fatalf("%s: building with %s:\n%s", name, compiler, out)
+	}
+	runBench(b, name, outputBinary, programFlags)
+}
+
+func runBench(b *testing.B, name, binary string, benchFlags []string) {
+	b.Helper()
+	b.Run(name, func(b *testing.B) {
+		var err error
+		for i := 0; i < b.N; i++ {
+			err = exec.Command(binary, benchFlags...).Run()
+			if err != nil {
+				out, err2 := exec.Command(binary, benchFlags...).CombinedOutput()
+				if err2 != nil {
+					if err.Error() != err2.Error() {
+						err2 = errors.Join(err, err2)
+					}
+					b.Fatalf("running program %s: %s\n%s", name, err2, out)
+				}
+				b.Fatalf("running program %s: %s", name, err)
+			}
+		}
+	})
 }
 
 func setup() (benchnames []string) {

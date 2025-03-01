@@ -8,7 +8,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -29,18 +28,6 @@ func main() {
 		log.Fatal(err)
 	}
 	err = drawBenchmark(langs, output, baseLang)
-	if err != nil {
-		log.Fatal(err)
-	}
-	for i := range langs {
-		for j := range langs[i].Results {
-			if langs[i].Results[j].ID() == "fannkuch-redux args=4" {
-				langs[i].Results = slices.Delete(langs[i].Results, j, j+1)
-				break
-			}
-		}
-	}
-	err = drawBenchmark(langs, "omit_fk4_"+output, baseLang)
 	if err != nil {
 		log.Fatal(err)
 	}
