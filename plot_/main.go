@@ -34,11 +34,22 @@ func main() {
 }
 
 func drawBenchmark(langs []langBench, savefile, baseLang string) error {
+	var nBenchs int
+	for i := range langs {
+		if langs[i].Langname == baseLang {
+			nBenchs = len(langs[i].Results)
+		}
+	}
+	if nBenchs == 0 {
+		return fmt.Errorf("base language %q not found among %v", baseLang, langs)
+	}
 	var (
+		maxBenchs  = nBenchs * len(langs)
 		plotHeight = 10 * vg.Inch
-		plotWidth  = plotHeight * vg.Length(len(langs)) / 2
+		plotWidth  = plotHeight * vg.Length(maxBenchs) / 20
+		benchWidth = plotWidth / vg.Length(nBenchs)
 
-		fontsize = plotHeight / 50
+		fontsize = plotHeight / 25
 		barwidth = plotHeight / 35
 	)
 
@@ -82,6 +93,7 @@ func drawBenchmark(langs []langBench, savefile, baseLang string) error {
 	}
 	p.Legend.Top = true
 	p.NominalX(nominals...)
+	p.X.Tick.Label.Font.Size = benchWidth / 12 // Nominal size.
 
 	p.Title.TextStyle.Font.Size = fontsize
 	p.Legend.TextStyle.Font.Size = fontsize
