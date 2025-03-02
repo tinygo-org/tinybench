@@ -14,6 +14,8 @@ func BenchmarkAll(b *testing.B) {
 	b.Logf("looking for benchmarks in %v", benchnames)
 	hasClang := exec.Command("clang", "--version").Run() == nil
 	hasZig := exec.Command("zig", "version").Run() == nil
+	hasGo := exec.Command("go", "version").Run() == nil
+	hasTinygo := exec.Command("tinygo", "version").Run() == nil
 	for _, testname := range benchnames {
 		argdata, err := os.ReadFile(testname + "/args.txt")
 		casesJoined := strings.TrimSpace(string(argdata))
@@ -30,31 +32,31 @@ func BenchmarkAll(b *testing.B) {
 			arginput := strings.Split(cases[i], " ")
 			b.Run(testname+":args="+cases[i], func(b *testing.B) {
 				// GO LANGUAGE BENCHMARKS.
-				if errGo == nil {
+				if hasGo && errGo == nil {
 					// UPSTREAM GO BENCHMARK.
-					runCompileAndBench(b, "go", "go", "./go.bin", []string{"build", "-o=go.bin", "./" + testname + "/go"}, arginput)
+					goFilepath := "./" + testname + "/go/main.go"
+					goFlags := append(goBaseFlags, goFilepath)
+					runCompileAndBench(b, "go", "go", "./go.bin", goFlags, arginput)
 
-					// TINYGO BENCHMARK.
-					runCompileAndBench(b, "tinygo", "tinygo", "./tinygo", []string{"build", "-o=tinygo", "-opt=2", "./" + testname + "/go"}, arginput)
+					if hasTinygo {
+						// TINYGO BENCHMARK.
+						tinygoFlags := append(tinygoBaseFlags, goFilepath)
+						runCompileAndBench(b, "tinygo", "tinygo", "./tinybin", tinygoFlags, arginput)
+					}
 				}
 
 				// C LANGUAGE BENCHMARKS.
 				if errC == nil {
-					// gccFlags should have -O3 to optimize for speed.
-					flags, ok := gccFlags[testname]
-					if !ok {
-						b.Fatalf("please add %s entry to gccFlags variable", testname)
-					} else if !strings.Contains(flags, "-O3") {
-						b.Fatalf("please add '-O3' to gccFlags for test %s", testname)
-					}
-					args := strings.Split(flags, " ")
-
+					linkFlags := gccLinkFlags[testname]
+					cFilepath := testname + "/c/main.c"
+					gccFlags := append(gccBaseFlags, cFilepath)
+					gccFlags = append(gccFlags, linkFlags...)
 					// GCC COMPILER BENCHMARK.
-					runCompileAndBench(b, "C gcc", "gcc", "./c.bin", args, arginput)
+					runCompileAndBench(b, "C gcc", "gcc", "./c.bin", gccFlags, arginput)
 
 					if hasClang {
 						// CLANG COMPILER BENCHMARK.
-						runCompileAndBench(b, "C clang", "clang", "./c.bin", args, arginput)
+						runCompileAndBench(b, "C clang", "clang", "./c.bin", gccFlags, arginput)
 					}
 				}
 

@@ -1,6 +1,6 @@
 module tinybench
 
-go 1.23.6
+go 1.23
 
 require gonum.org/v1/plot v0.15.0
 

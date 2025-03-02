@@ -101,14 +101,17 @@ ok      tinybench       195.491s
 
 ## Add a benchmark
 The way tinybench works is all directories with no `.` or `_` character (anywhere in name) in this repos' root directory are added to the benchmark corpus.
-Within each of these directories a `c` and `go` folder is searched for and their code compiled and run automatically. So adding a new benchmark is as simple as:
+Within each of these directories a `c` and `go` folder is searched for and their code compiled and run automatically. Flags used for the compilers can be found in [`compilerflags_test.go`](./compiler_flags.go).
+
+To add a new test follow these steps:
 
 1. Creating a new top level folder with a descriptive name such as `rsa-keygen` with no `.` or `_` characters
 
 
 2. Add an `args.txt` file to the folder with the OS arguments to the program and add a single line with an argument i.e: `-s 1024` (flag `s` with value `1024`).
-    - Each line of this file will contain a test case
+    - Each line of this file will contain a benchmark case.
 
-3. Create folders with the language you wish to test. Each will be run with arguments provided by `args.txt`
-    - `go`: Will contain a `package main` project that is compiled.
-    - `c`: Contains the C source code. Since linking is done via flags you must add your project's flags to `gccFlags` map in [`gccflags_test.go`]
+3. Create folders with the language you wish to test. Each will be run with arguments provided by `args.txt`. Each folder should contain a single file called `main.<extension>` where `<extension>` is the file extension of the language being teste.
+    - `<benchmark-name>/go/main.go`: Will contain a `package main` project that is compiled for the benchmark.
+    - `<benchmark-name>/c/main.c`: Contains the C source code for benchmark. Since linking is done via flags you must add your project's flags to `gccFlags` map.
+    - `<benchmark-name>/zig/main.zig`: Contains the Zig source code for benchmark.
