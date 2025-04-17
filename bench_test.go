@@ -132,7 +132,9 @@ func runBench(b *testing.B, name, binary string, benchFlags []string, ensureComp
 	b.Helper()
 	b.Run(name, func(b *testing.B) {
 		var err error
+		b.StopTimer()
 		ensureCompile(b)
+		b.StartTimer()
 		for i := 0; i < b.N; i++ {
 			err = exec.Command(binary, benchFlags...).Run()
 			if err != nil {
