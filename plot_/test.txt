@@ -2,49 +2,78 @@ goos: linux
 goarch: amd64
 pkg: tinybench
 cpu: 12th Gen Intel(R) Core(TM) i5-12400F
-BenchmarkAll/fannkuch-redux:args=4/go-12            2532           1258374 ns/op
-BenchmarkAll/fannkuch-redux:args=4/tinygo-12       10000            111840 ns/op
-BenchmarkAll/fannkuch-redux:args=4/C_gcc-12         5246            286015 ns/op
-BenchmarkAll/fannkuch-redux:args=4/C_clang-12       3789            327389 ns/op
-BenchmarkAll/fannkuch-redux:args=8/go-12             583           3673849 ns/op
-BenchmarkAll/fannkuch-redux:args=8/tinygo-12         554           2190794 ns/op
-BenchmarkAll/fannkuch-redux:args=8/C_gcc-12          591           2035831 ns/op
-BenchmarkAll/fannkuch-redux:args=8/C_clang-12        577           2394455 ns/op
-BenchmarkAll/fannkuch-redux:args=9/go-12              72          15924642 ns/op
-BenchmarkAll/fannkuch-redux:args=9/tinygo-12          79          13663960 ns/op
-BenchmarkAll/fannkuch-redux:args=9/C_gcc-12           58          18570973 ns/op
-BenchmarkAll/fannkuch-redux:args=9/C_clang-12         67          16287405 ns/op
-BenchmarkAll/n-body:args=50000/go-12                 169           7690990 ns/op
-BenchmarkAll/n-body:args=50000/tinygo-12             301           4433219 ns/op
-BenchmarkAll/n-body:args=50000/C_gcc-12              470           3800262 ns/op
-BenchmarkAll/n-body:args=50000/C_clang-12            331           4201452 ns/op
-BenchmarkAll/n-body:args=100000/go-12                136           9488607 ns/op
-BenchmarkAll/n-body:args=100000/tinygo-12            219           5676772 ns/op
-BenchmarkAll/n-body:args=100000/C_gcc-12             243           4506516 ns/op
-BenchmarkAll/n-body:args=100000/C_clang-12           241           4695960 ns/op
-BenchmarkAll/n-body:args=200000/go-12                 85          14434439 ns/op
-BenchmarkAll/n-body:args=200000/tinygo-12            100          10199184 ns/op
-BenchmarkAll/n-body:args=200000/C_gcc-12             135           9055803 ns/op
-BenchmarkAll/n-body:args=200000/C_clang-12           133           8515611 ns/op
-BenchmarkAll/n-body-nosqrt:args=50000/go-12           68          15524283 ns/op
-BenchmarkAll/n-body-nosqrt:args=50000/tinygo-12                       92          13138875 ns/op
-BenchmarkAll/n-body-nosqrt:args=50000/C_gcc-12                        97          12712724 ns/op
-BenchmarkAll/n-body-nosqrt:args=50000/C_clang-12                      98          12489245 ns/op
-BenchmarkAll/n-body-nosqrt:args=100000/go-12                          40          29317264 ns/op
-BenchmarkAll/n-body-nosqrt:args=100000/tinygo-12                      48          25551090 ns/op
-BenchmarkAll/n-body-nosqrt:args=100000/C_gcc-12                       50          23990762 ns/op
-BenchmarkAll/n-body-nosqrt:args=100000/C_clang-12                     50          23970287 ns/op
-BenchmarkAll/n-body-nosqrt:args=200000/go-12                          20          58332864 ns/op
-BenchmarkAll/n-body-nosqrt:args=200000/tinygo-12                      24          49792731 ns/op
-BenchmarkAll/n-body-nosqrt:args=200000/C_gcc-12                       25          47379559 ns/op
-BenchmarkAll/n-body-nosqrt:args=200000/C_clang-12                     25          47405761 ns/op
-BenchmarkAll/rsa-keygen:args=-s_512/go-12                            175           6519903 ns/op
-BenchmarkAll/rsa-keygen:args=-s_512/tinygo-12                        232           5131367 ns/op
-BenchmarkAll/rsa-keygen:args=-s_512/C_gcc-12                         231           4594060 ns/op
-BenchmarkAll/rsa-keygen:args=-s_512/C_clang-12                       248           4689895 ns/op
-BenchmarkAll/rsa-keygen:args=-s_1024/go-12                            76          13506244 ns/op
-BenchmarkAll/rsa-keygen:args=-s_1024/tinygo-12                        50          30130566 ns/op
-BenchmarkAll/rsa-keygen:args=-s_1024/C_gcc-12                        121           9193362 ns/op
-BenchmarkAll/rsa-keygen:args=-s_1024/C_clang-12                      132           9502825 ns/op
-PASS
-ok      tinybench       95.586s
+BenchmarkAll
+    bench_test.go:75: found compiler "go"
+    bench_test.go:75: found compiler "tinygo"
+    bench_test.go:75: found compiler "gcc"
+    bench_test.go:77: skipping all benchmarks for compiler "clang"
+    bench_test.go:77: skipping all benchmarks for compiler "zig"
+    bench_test.go:80: looking for benchmarks in [fannkuch-redux n-body n-body-nosqrt rsa-keygen]
+    bench_test.go:112: name="fannkuch-redux" compiler="go" binarysize=2244750
+BenchmarkAll/fannkuch-redux:args=6/go/go
+BenchmarkAll/fannkuch-redux:args=6/go/go-12                 2191           1278717 ns/op
+BenchmarkAll/fannkuch-redux:args=7/go/go
+BenchmarkAll/fannkuch-redux:args=7/go/go-12                 1077           2271913 ns/op
+BenchmarkAll/fannkuch-redux:args=9/go/go
+BenchmarkAll/fannkuch-redux:args=9/go/go-12                   72          17077474 ns/op
+    bench_test.go:112: name="fannkuch-redux" compiler="tinygo" binarysize=1476656
+BenchmarkAll/fannkuch-redux:args=6/go/tinygo
+BenchmarkAll/fannkuch-redux:args=6/go/tinygo-12             5079            907805 ns/op
+BenchmarkAll/fannkuch-redux:args=7/go/tinygo
+BenchmarkAll/fannkuch-redux:args=7/go/tinygo-12             1454           1237479 ns/op
+BenchmarkAll/fannkuch-redux:args=9/go/tinygo
+BenchmarkAll/fannkuch-redux:args=9/go/tinygo-12               84          14249705 ns/op
+    bench_test.go:112: name="fannkuch-redux" compiler="gcc" binarysize=16368
+BenchmarkAll/fannkuch-redux:args=6/c/gcc
+BenchmarkAll/fannkuch-redux:args=6/c/gcc-12                 1594            790916 ns/op
+BenchmarkAll/fannkuch-redux:args=7/c/gcc
+BenchmarkAll/fannkuch-redux:args=7/c/gcc-12                 1092           1656851 ns/op
+BenchmarkAll/fannkuch-redux:args=9/c/gcc
+BenchmarkAll/fannkuch-redux:args=9/c/gcc-12                   73          16122876 ns/op
+    bench_test.go:112: name="n-body" compiler="go" binarysize=2240296
+BenchmarkAll/n-body:args=50000/go/go
+BenchmarkAll/n-body:args=50000/go/go-12                      200           6225459 ns/op
+BenchmarkAll/n-body:args=100000/go/go
+BenchmarkAll/n-body:args=100000/go/go-12                     122           9914131 ns/op
+BenchmarkAll/n-body:args=200000/go/go
+BenchmarkAll/n-body:args=200000/go/go-12                      82          14572174 ns/op
+    bench_test.go:112: name="n-body" compiler="tinygo" binarysize=1479888
+BenchmarkAll/n-body:args=50000/go/tinygo
+BenchmarkAll/n-body:args=50000/go/tinygo-12                  360           3006030 ns/op
+BenchmarkAll/n-body:args=100000/go/tinygo
+BenchmarkAll/n-body:args=100000/go/tinygo-12                 238           5720353 ns/op
+BenchmarkAll/n-body:args=200000/go/tinygo
+BenchmarkAll/n-body:args=200000/go/tinygo-12                 120           9858650 ns/op
+    bench_test.go:112: name="n-body" compiler="gcc" binarysize=16440
+BenchmarkAll/n-body:args=50000/c/gcc
+BenchmarkAll/n-body:args=50000/c/gcc-12                      382           3210258 ns/op
+BenchmarkAll/n-body:args=100000/c/gcc
+BenchmarkAll/n-body:args=100000/c/gcc-12                     279           5300158 ns/op
+BenchmarkAll/n-body:args=200000/c/gcc
+BenchmarkAll/n-body:args=200000/c/gcc-12                     133           8536438 ns/op
+    bench_test.go:112: name="n-body-nosqrt" compiler="go" binarysize=2240764
+BenchmarkAll/n-body-nosqrt:args=50000/go/go
+BenchmarkAll/n-body-nosqrt:args=50000/go/go-12                79          15288955 ns/op
+BenchmarkAll/n-body-nosqrt:args=100000/go/go
+BenchmarkAll/n-body-nosqrt:args=100000/go/go-12               39          30033935 ns/op
+BenchmarkAll/n-body-nosqrt:args=200000/go/go
+BenchmarkAll/n-body-nosqrt:args=200000/go/go-12               20          56976540 ns/op
+    bench_test.go:112: name="n-body-nosqrt" compiler="tinygo" binarysize=1480872
+BenchmarkAll/n-body-nosqrt:args=50000/go/tinygo
+BenchmarkAll/n-body-nosqrt:args=50000/go/tinygo-12            87          12650244 ns/op
+BenchmarkAll/n-body-nosqrt:args=100000/go/tinygo
+BenchmarkAll/n-body-nosqrt:args=100000/go/tinygo-12           46          24974041 ns/op
+BenchmarkAll/n-body-nosqrt:args=200000/go/tinygo
+BenchmarkAll/n-body-nosqrt:args=200000/go/tinygo-12           24          47402431 ns/op
+    bench_test.go:112: name="n-body-nosqrt" compiler="gcc" binarysize=16520
+BenchmarkAll/n-body-nosqrt:args=50000/c/gcc
+BenchmarkAll/n-body-nosqrt:args=50000/c/gcc-12                97          12413611 ns/op
+BenchmarkAll/n-body-nosqrt:args=100000/c/gcc
+BenchmarkAll/n-body-nosqrt:args=100000/c/gcc-12               48          23132312 ns/op
+BenchmarkAll/n-body-nosqrt:args=200000/c/gcc
+BenchmarkAll/n-body-nosqrt:args=200000/c/gcc-12               26          44983454 ns/op
+    bench_test.go:112: name="rsa-keygen" compiler="go" binarysize=2795929
+BenchmarkAll/rsa-keygen:args=-s_512/go/go
+BenchmarkAll/rsa-keygen:args=-s_512/go/go-12                 140           9055165 ns/op
+BenchmarkAll/rsa-keygen:args=-s_1024/go/go
+BenchmarkAll/rsa-keygen:args=-s_1024/go/go-12                 46          26303222 ns/op

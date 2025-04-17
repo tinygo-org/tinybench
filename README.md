@@ -9,18 +9,25 @@ Benchmarks for comparing TinyGo's performance
 
 ![Benchmarks](./benchmark.png)
 
+## Requirements
+- [Go](https://go.dev/)
+- [TinyGo](https://tinygo.org/getting-started/). Either [quick install](https://tinygo.org/getting-started/install/) or [build from source](https://tinygo.org/docs/guides/build/)
+- Optional: [Zig](https://ziglang.org/)
+- Optional: OpenSSH library. On Ubuntu: `sudo apt-get install openssh-server`
+
+
 ## Run Benchmarks
 ```sh
-go test -bench=.
+go test -v -bench=.
 
 # Or to only run a certain test's benchmarks use expression "BenchmarkAll/<NAME OF TEST>:" 
-go test -bench "BenchmarkAll/n-body:"  # You may need to escape the colon on windows powershell.
+go test -v -bench "BenchmarkAll/n-body:"  # You may need to escape the colon on windows powershell.
 ```
 
 #### Generate benchmark image
 Note the below command will not output results
 ```sh
-go test -bench . | go run ./plot_/ -o benchmark.png
+go test -v -bench . | go run ./plot_/ -o benchmark.png
 ```
 
 
@@ -101,7 +108,7 @@ ok      tinybench       195.491s
 
 ## Add a benchmark
 The way tinybench works is all directories with no `.` or `_` character (anywhere in name) in this repos' root directory are added to the benchmark corpus.
-Within each of these directories a `c` and `go` folder is searched for and their code compiled and run automatically. Flags used for the compilers can be found in [`compilerflags_test.go`](./compiler_flags.go).
+Within each of these directories a `c` and `go` folder is searched for and their code compiled and run automatically. Flags used for the compilers can be found in [`compilerflags_test.go`](./compilerflags_test.go).
 
 To add a new test follow these steps:
 

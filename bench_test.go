@@ -6,16 +6,79 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 	"testing"
 )
 
+type Compiler struct {
+	Language     string
+	CanRun       bool
+	Compiler     string
+	OutputBinary string
+	MakeArgs     func(testname string) []string
+}
+
+var compilers = []Compiler{
+	{
+		Language:     "go",
+		CanRun:       exec.Command("go", "version").Run() == nil,
+		Compiler:     "go",
+		OutputBinary: "./go.bin",
+		MakeArgs: func(testname string) []string {
+			return append(goBaseFlags, "./"+testname+"/go/main.go")
+		},
+	},
+	{
+		Language:     "go",
+		CanRun:       exec.Command("tinygo", "version").Run() == nil,
+		Compiler:     "tinygo",
+		OutputBinary: "./tinybin",
+		MakeArgs: func(testname string) []string {
+			return append(tinygoBaseFlags, "./"+testname+"/go/main.go")
+		},
+	},
+	{
+		Language:     "c",
+		CanRun:       exec.Command("gcc", "--version").Run() == nil,
+		Compiler:     "gcc",
+		OutputBinary: "./c.bin",
+		MakeArgs:     cFlags,
+	},
+	{
+		Language:     "c",
+		CanRun:       exec.Command("clang", "--version").Run() == nil,
+		Compiler:     "clang",
+		OutputBinary: "./c.bin",
+		MakeArgs:     cFlags,
+	},
+	{
+		Language:     "zig",
+		CanRun:       exec.Command("zig", "version").Run() == nil,
+		Compiler:     "zig",
+		OutputBinary: "./zig.bin",
+		MakeArgs: func(testname string) []string {
+			return append(zigBaseFlags, "./"+testname+"/zig/main.zig")
+		},
+	},
+}
+
+func cFlags(testname string) []string {
+	linkFlags := gccLinkFlags[testname]
+	cFilepath := "./" + testname + "/c/main.c"
+	ccFlags := append(gccBaseFlags, cFilepath)
+	return append(ccFlags, linkFlags...)
+}
+
 func BenchmarkAll(b *testing.B) {
 	benchnames := setup()
+	for _, c := range compilers {
+		if c.CanRun {
+			b.Logf("found compiler %q", c.Compiler)
+		} else {
+			b.Logf("skipping all benchmarks for compiler %q", c.Compiler)
+		}
+	}
 	b.Logf("looking for benchmarks in %v", benchnames)
-	hasClang := exec.Command("clang", "--version").Run() == nil
-	hasZig := exec.Command("zig", "version").Run() == nil
-	hasGo := exec.Command("go", "version").Run() == nil
-	hasTinygo := exec.Command("tinygo", "version").Run() == nil
 	for _, testname := range benchnames {
 		argdata, err := os.ReadFile(testname + "/args.txt")
 		casesJoined := strings.TrimSpace(string(argdata))
@@ -24,68 +87,52 @@ func BenchmarkAll(b *testing.B) {
 		} else if err != nil {
 			b.Fatalf("%s failed open arguments file 'args.txt': %s", testname, err)
 		}
+
 		cases := strings.Split(casesJoined, "\n")
-		_, errGo := os.Stat(testname + "/go")
-		_, errC := os.Stat(testname + "/c")
-		_, errZig := os.Stat(testname + "/zig")
-		for i := range cases {
-			arginput := strings.Split(cases[i], " ")
-			b.Run(testname+":args="+cases[i], func(b *testing.B) {
-				// GO LANGUAGE BENCHMARKS.
-				if hasGo && errGo == nil {
-					// UPSTREAM GO BENCHMARK.
-					goFilepath := "./" + testname + "/go/main.go"
-					goFlags := append(goBaseFlags, goFilepath)
-					runCompileAndBench(b, "go", "go", "./go.bin", goFlags, arginput)
+		for _, compiler := range compilers {
+			if !compiler.CanRun {
+				continue // skip compiler benchmark.
+			}
+			testDir := testname + "/" + compiler.Language
+			_, err := os.Stat(testDir)
+			if os.IsNotExist(err) {
+				b.Logf("%s skipped for %s", testname, compiler.Compiler)
+				continue // Benchmark not implemented for this language.
+			} else if err != nil {
+				b.Fatal(err)
+			}
 
-					if hasTinygo {
-						// TINYGO BENCHMARK.
-						tinygoFlags := append(tinygoBaseFlags, goFilepath)
-						runCompileAndBench(b, "tinygo", "tinygo", "./tinybin", tinygoFlags, arginput)
+			var onceCompile sync.Once
+			ensureCompile := func(b *testing.B) {
+				onceCompile.Do(func() {
+					compArgs := compiler.MakeArgs(testname)
+					out, err := exec.Command(compiler.Compiler, compArgs...).CombinedOutput()
+					if err != nil {
+						b.Fatalf("%s: building with %s flags=%v:\n%s", testname, compiler.Compiler, compArgs, out)
 					}
-				}
-
-				// C LANGUAGE BENCHMARKS.
-				if errC == nil {
-					linkFlags := gccLinkFlags[testname]
-					cFilepath := testname + "/c/main.c"
-					gccFlags := append(gccBaseFlags, cFilepath)
-					gccFlags = append(gccFlags, linkFlags...)
-					// GCC COMPILER BENCHMARK.
-					runCompileAndBench(b, "C gcc", "gcc", "./c.bin", gccFlags, arginput)
-
-					if hasClang {
-						// CLANG COMPILER BENCHMARK.
-						runCompileAndBench(b, "C clang", "clang", "./c.bin", gccFlags, arginput)
+					finfo, err := os.Stat(compiler.OutputBinary)
+					if err != nil {
+						b.Fatalf("%s: os.Stat(%q): %s", testname, compiler.OutputBinary, err.Error())
 					}
+					b.Logf("name=%q compiler=%q binarysize=%d\n", testname, compiler.Compiler, finfo.Size())
+				})
+			}
+			for i := range cases {
+				argInput := strings.Split(cases[i], " ")
+				runBench(b, testname+":args="+cases[i]+"/"+compiler.Language+"/"+compiler.Compiler, compiler.OutputBinary, argInput, ensureCompile)
+				if b.Failed() {
+					b.FailNow()
 				}
-
-				// ZIG LANGUAGE BENCHMARKS.
-				if hasZig && errZig == nil {
-					compilerFlags := append(zigBaseFlags, "./"+testname+"/zig/main.zig")
-					runCompileAndBench(b, "zig", "zig", "./zig.bin", compilerFlags, arginput)
-				}
-			})
-			if b.Failed() {
-				b.FailNow() // Don't keep going if error encountered to avoid error spam on all benchmarks.
 			}
 		}
 	}
 }
 
-func runCompileAndBench(b *testing.B, name, compiler, outputBinary string, compilerFlags, programFlags []string) {
-	b.Helper()
-	out, err := exec.Command(compiler, compilerFlags...).CombinedOutput()
-	if err != nil {
-		b.Fatalf("%s: building with %s flags=%v:\n%s", name, compilerFlags, compiler, out)
-	}
-	runBench(b, name, outputBinary, programFlags)
-}
-
-func runBench(b *testing.B, name, binary string, benchFlags []string) {
+func runBench(b *testing.B, name, binary string, benchFlags []string, ensureCompile func(b *testing.B)) {
 	b.Helper()
 	b.Run(name, func(b *testing.B) {
 		var err error
+		ensureCompile(b)
 		for i := 0; i < b.N; i++ {
 			err = exec.Command(binary, benchFlags...).Run()
 			if err != nil {

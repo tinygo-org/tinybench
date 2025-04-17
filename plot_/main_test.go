@@ -10,7 +10,7 @@ import (
 var input string
 
 func TestParseBench(t *testing.T) {
-	l, err := parsebench(strings.NewReader(input))
+	l, err := parsebench(strings.NewReader(input), "tinygo")
 	if err != nil {
 		t.Fatal(err)
 	}
