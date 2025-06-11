@@ -14,8 +14,7 @@ func TestParseBench(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(l) != 4 {
+	if len(l) != 5 {
 		t.Fatal("missing data")
 	}
-	t.Errorf("%+v", l)
 }

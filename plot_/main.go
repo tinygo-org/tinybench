@@ -18,12 +18,13 @@ import (
 	"gonum.org/v1/plot/vg"
 )
 
-var colors = map[string]color.Color{
-	"go":      plotutil.Color(2), // Blue: Gophers.
-	"tinygo":  plotutil.Color(1), // Green: for the color of the PCBs this runs on.
-	"C gcc":   plotutil.Color(0), // Red: for blood of developers spilt.
-	"C clang": plotutil.Color(4), // Violet: for "roses are red, violets are blue, clobbered register #32".
-	"zig":     plotutil.Color(3), // Orange: for Zig go brrr.
+var compilerColors = map[string]color.Color{
+	"go":     plotutil.Color(2), // Blue: Gophers.
+	"tinygo": plotutil.Color(1), // Green: for the color of the PCBs this runs on.
+	"gcc":    plotutil.Color(0), // Red: for blood of developers spilt.
+	"clang":  plotutil.Color(4), // Violet: for "roses are red, violets are blue, clobbered register #32".
+	"zig":    plotutil.Color(3), // Orange: for Zig go brrr.
+	"rustc":  plotutil.Color(5), // How serendipitous, next color looks like rust.
 }
 
 func main() {
@@ -41,16 +42,15 @@ func main() {
 	}
 }
 
-func drawBenchmark(langs []langBench, savefile, baseLang string) error {
-
+func drawBenchmark(langs []langBench, savefile, baseCompiler string) error {
 	var nBenchs int
 	for i := range langs {
-		if langs[i].Langname == baseLang {
+		if langs[i].Compiler == baseCompiler {
 			nBenchs = len(langs[i].Results)
 		}
 	}
 	if nBenchs == 0 {
-		return fmt.Errorf("base language %q not found among %v", baseLang, langs)
+		return fmt.Errorf("base compiler %q not found among %v", baseCompiler, langs)
 	}
 	var (
 		maxBenchs  = nBenchs * len(langs)
@@ -61,32 +61,32 @@ func drawBenchmark(langs []langBench, savefile, baseLang string) error {
 		fontsize = plotHeight / 25
 		barwidth = plotHeight / 35
 	)
-	p_binsize := plot.New()
-	p_binsize.Title.Text = "Compiler/language binary size benchmark (lower is better)"
-	p_binsize.Y.Label.Text = "binary size wrt " + baseLang + " (percent)"
-	p_binsize.Y.Tick.Label.Font.Size = fontsize
-	var binsizeplotters []plot.Plotter
-	type binsizeResult struct {
-		BinSize   int
-		Benchmark string
-	}
-	for i := range langs {
-		bar, err := plotter.NewBarChart(&langs[i], barwidth)
-		if err != nil {
-			return err
-		}
+	// p_binsize := plot.New()
+	// p_binsize.Title.Text = "Compiler/language binary size benchmark (lower is better)"
+	// p_binsize.Y.Label.Text = "binary size wrt " + baseCompiler + " (percent)"
+	// p_binsize.Y.Tick.Label.Font.Size = fontsize
+	// var binsizeplotters []plot.Plotter
+	// type binsizeResult struct {
+	// 	BinSize   int
+	// 	Benchmark string
+	// }
+	// for i := range langs {
+	// 	bar, err := plotter.NewBarChart(&langs[i], barwidth)
+	// 	if err != nil {
+	// 		return err
+	// 	}
 
-		bar.Width = barwidth / vg.Length(maxBenchs)
-		bar.LineStyle.Width = vg.Length(0)
-		bar.Color = colors[langs[i].Langname]
-		bar.Offset = barwidth * vg.Length(i)
-		binsizeplotters = append(binsizeplotters, bar)
-	}
+	// 	bar.Width = barwidth / vg.Length(maxBenchs)
+	// 	bar.LineStyle.Width = vg.Length(0)
+	// 	bar.Color = colors[langs[i].Langname]
+	// 	bar.Offset = barwidth * vg.Length(i)
+	// 	binsizeplotters = append(binsizeplotters, bar)
+	// }
 
 	p_time := plot.New()
 
 	p_time.Title.Text = "Compiler/language performance benchmark (lower is better)"
-	p_time.Y.Label.Text = "Average runtime normalized wrt " + baseLang + " (percent)"
+	p_time.Y.Label.Text = "Average runtime normalized wrt " + baseCompiler + " (percent)"
 	p_time.Y.Tick.Label.Font.Size = fontsize
 
 	var plotters []plot.Plotter
@@ -99,7 +99,7 @@ func drawBenchmark(langs []langBench, savefile, baseLang string) error {
 
 		bar.Width = barwidth
 		bar.LineStyle.Width = vg.Length(0)
-		bar.Color = colors[langs[i].Langname]
+		bar.Color = compilerColors[langs[i].Compiler]
 		bar.Offset = barwidth * vg.Length(i)
 		plotters = append(plotters, bar)
 	}
@@ -130,10 +130,35 @@ func drawBenchmark(langs []langBench, savefile, baseLang string) error {
 	return nil
 }
 
+type rawCompilerResult struct {
+	Benchmark string
+	Compiler  string
+	Size      int
+	Runs      []rawCompilerBench
+}
+
+type rawCompilerBench struct {
+	Benchmark string
+	Arg       string
+	LangName  string
+	Compiler  string
+	N         int
+	PerOp     time.Duration
+}
+
 type langBench struct {
 	Langname string
 	Compiler string
 	Results  []benchResult
+}
+
+func (cr *rawCompilerResult) Language() (langname string) {
+	if len(cr.Runs) > 0 {
+		langname = cr.Runs[0].LangName
+	} else {
+		langname = cr.Compiler
+	}
+	return langname
 }
 
 func (lb *langBench) DisplayName() string {
@@ -143,6 +168,8 @@ func (lb *langBench) DisplayName() string {
 		return "C " + lb.Compiler
 	} else if lb.Compiler == "tinygo" {
 		return "tinygo"
+	} else if lb.Compiler == "rustc" {
+		return "rust"
 	}
 	return lb.Langname + " " + lb.Compiler
 }
@@ -164,83 +191,61 @@ func (br benchResult) ID() string {
 	return br.Name + " " + br.Args
 }
 
-func parsebench(r io.Reader, baseCompiler string) (langs []langBench, err error) {
-	br := bufio.NewReader(r)
-	var base *langBench
-	binarySize := -1
-	binaryCompiler := ""
-	binaryBench := ""
-	for {
-		orig, rderr := br.ReadString('\n')
-		isRecord := strings.HasPrefix(orig, "BenchmarkAll/") && strings.HasSuffix(orig, "ns/op\n")
-		if !isRecord {
-			_, remaining, _ := strings.Cut(orig, "name=\"")
-			benchname, remaining, _ := strings.Cut(remaining, "\" compiler=\"")
-			name, strbinsize, _ := strings.Cut(remaining, "\" binarysize=")
-			bsize, err := strconv.Atoi(strings.TrimSpace(strbinsize))
-			if err == nil {
-				// Found registry of binary size.
-				binaryBench = benchname
-				binaryCompiler = name
-				binarySize = bsize
-			}
-			if rderr != nil {
-				break
-			}
-			continue
-		}
-		_, line, _ := strings.Cut(orig, "/")
-		benchname, line, _ := strings.Cut(line, "/")
-		benchname, args, _ := strings.Cut(benchname, ":")
-		splits := strings.Fields(line)
-		if len(splits) != 4 {
-			return langs, fmt.Errorf("line %q unexpected formatting", orig)
-		}
-		langAndCompiler, _, _ := strings.Cut(splits[0], "-")
-		language, compiler, ok := strings.Cut(langAndCompiler, "/")
-		if !ok {
-			return langs, fmt.Errorf("line %q unexpected formatting of lang/compiler tuple", orig)
-		}
-		N, err := strconv.Atoi(splits[1])
-		if err != nil {
-			return langs, err
-		}
-		ns, err := strconv.Atoi(splits[2])
-		if err != nil {
-			return langs, err
-		}
-		result := benchResult{
-			Name:  benchname,
-			Args:  args,
-			N:     N,
-			PerOp: time.Duration(ns) * time.Nanosecond,
-		}
-		if benchname == binaryBench && compiler == binaryCompiler {
-			result.BinarySize = binarySize
-		}
-		added := false
-		for i, lang := range langs {
-			if lang.Langname == language && compiler == lang.Compiler {
-				langs[i].Results = append(langs[i].Results, result)
-				added = true
-				break
-			}
-		}
-		if !added {
-			langs = append(langs, langBench{
-				Langname: language,
-				Compiler: compiler,
-				Results:  []benchResult{result},
-			})
-		}
+func parseKeyValue(data string, key string) string {
+	data = strings.TrimSpace(data)
+	_, vstart, ok1 := strings.Cut(data, key+"=")
+	hasQuote := ok1 && vstart[0] == '"'
+	if hasQuote {
+		value, _, _ := strings.Cut(vstart[1:], "\"")
+		return value
 	}
-	for i := range langs {
-		if baseCompiler == langs[i].Compiler {
-			base = &langs[i]
+	value, _, _ := strings.Cut(vstart, " ")
+	return value
+}
+
+func parsebench(r io.Reader, baseCompiler string) (langs []langBench, err error) {
+	rawbench, err := parseBenchRaw(r)
+	if err != nil {
+		return langs, err
+	}
+	langs = make([]langBench, 0, 256) // Make sure not resized since we are using a pointer to it.
+	var base *langBench
+	for _, bench := range rawbench {
+		binsize := bench.Size
+		lang := bench.Language()
+		compiler := bench.Compiler
+		benchname := bench.Benchmark
+		for _, run := range bench.Runs {
+			added := false
+			result := benchResult{
+				Name:       benchname,
+				BinarySize: binsize,
+				Args:       run.Arg,
+				N:          run.N,
+				PerOp:      run.PerOp,
+			}
+			for i := range langs {
+				target := &langs[i]
+				if target.Compiler == compiler && target.Langname == lang {
+					target.Results = append(target.Results, result)
+					added = true
+					break
+				}
+			}
+			if !added {
+				langs = append(langs, langBench{
+					Langname: lang,
+					Compiler: compiler,
+					Results:  []benchResult{result},
+				})
+				if baseCompiler == compiler {
+					base = &langs[len(langs)-1]
+				}
+			}
 		}
 	}
 	if base == nil {
-		return langs, fmt.Errorf("language %q not found", baseCompiler)
+		return langs, fmt.Errorf("base compiler %q result not found", baseCompiler)
 	}
 	for i := range langs {
 		for j := range langs[i].Results {
@@ -253,10 +258,74 @@ func parsebench(r io.Reader, baseCompiler string) (langs []langBench, err error)
 				}
 			}
 			if baseOp < 0 {
-				return langs, fmt.Errorf("failed to find %q benchmark among base language's benchmarks: %+v", id, base.Results)
+				return langs, fmt.Errorf("failed to find %q benchmark among base compiler's %q benchmarks: %+v", id, baseCompiler, base.Results)
 			}
 			langs[i].Results[j].PerOpNormalized = langs[i].Results[j].PerOp.Seconds() / baseOp
 		}
 	}
 	return langs, nil
+}
+
+func parseBenchRaw(r io.Reader) (benchs []rawCompilerResult, err error) {
+	br := bufio.NewReader(r)
+	var currentBench *rawCompilerResult
+	line := 0
+	for {
+		orig, rderr := br.ReadString('\n')
+		if rderr != nil {
+			break
+		}
+		line++
+		newBench := strings.Contains(orig, " compiler=") && strings.Contains(orig, " binarysize=")
+		if newBench {
+			if currentBench != nil {
+				benchs = append(benchs, *currentBench)
+			}
+			sz, _ := strconv.Atoi(parseKeyValue(orig, "binarysize"))
+			currentBench = &rawCompilerResult{
+				Benchmark: parseKeyValue(orig, "name"),
+				Compiler:  parseKeyValue(orig, "compiler"),
+				Size:      sz,
+			}
+			continue
+		}
+		isRecord := strings.HasPrefix(orig, "BenchmarkAll/") && strings.HasSuffix(orig, "ns/op\n")
+		if !isRecord {
+			continue
+		} else if currentBench == nil {
+			return benchs, fmt.Errorf("invalid line %d ordering %q", line, orig)
+		}
+		data := strings.TrimPrefix(orig, "BenchmarkAll/")
+		benchmark, data, _ := strings.Cut(data, ":")
+		args, data, _ := strings.Cut(data, "/")
+		language, data, _ := strings.Cut(data, "/")
+		compiler, data, _ := strings.Cut(data, " ")
+		if strings.Contains(compiler, "-") {
+			compiler, _, _ = strings.Cut(compiler, "-")
+		}
+		numbers := strings.Fields(data)
+		if len(numbers) != 3 {
+			return benchs, fmt.Errorf("malformed benchmark data line %d: %q", line, orig)
+		}
+		N, _ := strconv.Atoi(numbers[0])
+		ns, _ := strconv.Atoi(numbers[1])
+		if currentBench.Compiler != compiler {
+			return benchs, fmt.Errorf("mismatch compiler's name %q!=%q", currentBench.Compiler, compiler)
+		}
+		if currentBench.Benchmark != benchmark {
+			return benchs, fmt.Errorf("mismatch compiler's benchmark %q!=%q", currentBench.Benchmark, benchmark)
+		}
+		currentBench.Runs = append(currentBench.Runs, rawCompilerBench{
+			Benchmark: benchmark,
+			Arg:       args,
+			LangName:  language,
+			Compiler:  compiler,
+			N:         N,
+			PerOp:     time.Duration(ns) * time.Nanosecond,
+		})
+	}
+	if currentBench != nil {
+		benchs = append(benchs, *currentBench)
+	}
+	return benchs, nil
 }

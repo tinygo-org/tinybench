@@ -13,6 +13,7 @@ Benchmarks for comparing TinyGo's performance
 - [Go](https://go.dev/)
 - [TinyGo](https://tinygo.org/getting-started/). Either [quick install](https://tinygo.org/getting-started/install/) or [build from source](https://tinygo.org/docs/guides/build/)
 - Optional: [Zig](https://ziglang.org/)
+- Optional: [Rust](https://www.rust-lang.org/)
 - Optional: OpenSSH library. On Ubuntu: `sudo apt-get install openssh-server`
 
 

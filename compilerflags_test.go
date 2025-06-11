@@ -34,3 +34,8 @@ var tinygoBaseFlags = []string{
 	"-opt=2",
 	"-o=tinybin",
 }
+
+var rustBaseFlags = []string{
+	"-Copt-level=2",
+	"-o", "rust.bin",
+}
