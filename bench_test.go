@@ -60,6 +60,15 @@ var compilers = []Compiler{
 			return append(zigBaseFlags, "./"+testname+"/zig/main.zig")
 		},
 	},
+	{
+		Language:     "rust",
+		CanRun:       exec.Command("rustc", "-V").Run() == nil,
+		Compiler:     "rustc",
+		OutputBinary: "./rust.bin",
+		MakeArgs: func(testname string) []string {
+			return append(rustBaseFlags, "./"+testname+"/rust/main.rs")
+		},
+	},
 }
 
 func cFlags(testname string) []string {
