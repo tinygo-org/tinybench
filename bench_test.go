@@ -11,60 +11,61 @@ import (
 )
 
 type Compiler struct {
-	Language     string
-	CanRun       bool
-	Compiler     string
-	OutputBinary string
-	MakeArgs     func(testname string) []string
+	Language       string
+	CanRun         bool
+	VersionCommand *exec.Cmd
+	Compiler       string
+	OutputBinary   string
+	MakeArgs       func(testname string) []string
 }
 
 var compilers = []Compiler{
 	{
-		Language:     "go",
-		CanRun:       exec.Command("go", "version").Run() == nil,
-		Compiler:     "go",
-		OutputBinary: "./go.bin",
+		Language:       "go",
+		VersionCommand: exec.Command("go", "version"),
+		Compiler:       "go",
+		OutputBinary:   "./go.bin",
 		MakeArgs: func(testname string) []string {
 			return append(goBaseFlags, "./"+testname+"/go/main.go")
 		},
 	},
 	{
-		Language:     "go",
-		CanRun:       exec.Command("tinygo", "version").Run() == nil,
-		Compiler:     "tinygo",
-		OutputBinary: "./tinybin",
+		Language:       "go",
+		VersionCommand: exec.Command("tinygo", "version"),
+		Compiler:       "tinygo",
+		OutputBinary:   "./tinybin",
 		MakeArgs: func(testname string) []string {
 			return append(tinygoBaseFlags, "./"+testname+"/go/main.go")
 		},
 	},
 	{
-		Language:     "c",
-		CanRun:       exec.Command("gcc", "--version").Run() == nil,
-		Compiler:     "gcc",
-		OutputBinary: "./c.bin",
-		MakeArgs:     cFlags,
+		Language:       "c",
+		VersionCommand: exec.Command("gcc", "--version"),
+		Compiler:       "gcc",
+		OutputBinary:   "./c.bin",
+		MakeArgs:       cFlags,
 	},
 	{
-		Language:     "c",
-		CanRun:       exec.Command("clang", "--version").Run() == nil,
-		Compiler:     "clang",
-		OutputBinary: "./c.bin",
-		MakeArgs:     cFlags,
+		Language:       "c",
+		VersionCommand: exec.Command("clang", "--version"),
+		Compiler:       "clang",
+		OutputBinary:   "./c.bin",
+		MakeArgs:       cFlags,
 	},
 	{
-		Language:     "zig",
-		CanRun:       exec.Command("zig", "version").Run() == nil,
-		Compiler:     "zig",
-		OutputBinary: "./zig.bin",
+		Language:       "zig",
+		VersionCommand: exec.Command("zig", "version"),
+		Compiler:       "zig",
+		OutputBinary:   "./zig.bin",
 		MakeArgs: func(testname string) []string {
 			return append(zigBaseFlags, "./"+testname+"/zig/main.zig")
 		},
 	},
 	{
-		Language:     "rust",
-		CanRun:       exec.Command("rustc", "-V").Run() == nil,
-		Compiler:     "rustc",
-		OutputBinary: "./rust.bin",
+		Language:       "rust",
+		VersionCommand: exec.Command("rustc", "-V"),
+		Compiler:       "rustc",
+		OutputBinary:   "./rust.bin",
 		MakeArgs: func(testname string) []string {
 			return append(rustBaseFlags, "./"+testname+"/rust/main.rs")
 		},
@@ -80,9 +81,11 @@ func cFlags(testname string) []string {
 
 func BenchmarkAll(b *testing.B) {
 	benchnames := setup()
-	for _, c := range compilers {
-		if c.CanRun {
-			b.Logf("found compiler %q", c.Compiler)
+	for i, c := range compilers {
+		version, err := c.VersionCommand.Output()
+		if err == nil {
+			b.Logf("found compiler '%s'\n%s", c.Compiler, version)
+			compilers[i].CanRun = true
 		} else {
 			b.Logf("skipping all benchmarks for compiler %q", c.Compiler)
 		}
