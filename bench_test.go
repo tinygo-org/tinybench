@@ -3,8 +3,10 @@ package tinybench
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -12,14 +14,41 @@ import (
 
 type Compiler struct {
 	Language       string
-	CanRun         bool
 	VersionCommand *exec.Cmd
 	Compiler       string
 	OutputBinary   string
 	MakeArgs       func(testname string) []string
+
+	Version [3]int // 0:Major, 1:Minor, 2:Patch
+}
+
+func (c Compiler) CanRun() bool {
+	return c.Version != [3]int{}
+}
+
+func (c Compiler) VersionString() string {
+	return fmt.Sprintf("%d.%d.%d", c.Version[0], c.Version[1], c.Version[2])
 }
 
 var compilers = []Compiler{
+	{
+		Language:       "zig",
+		VersionCommand: exec.Command("zig", "version"),
+		Compiler:       "zig",
+		OutputBinary:   "./zig.bin",
+		MakeArgs: func(testname string) []string {
+			return append(zigBaseFlags, "./"+testname+"/zig/main.zig")
+		},
+	},
+	{
+		Language:       "rust",
+		VersionCommand: exec.Command("rustc", "-V"),
+		Compiler:       "rustc",
+		OutputBinary:   "./rust.bin",
+		MakeArgs: func(testname string) []string {
+			return append(rustBaseFlags, "./"+testname+"/rust/main.rs")
+		},
+	},
 	{
 		Language:       "go",
 		VersionCommand: exec.Command("go", "version"),
@@ -52,24 +81,6 @@ var compilers = []Compiler{
 		OutputBinary:   "./c.bin",
 		MakeArgs:       cFlags,
 	},
-	{
-		Language:       "zig",
-		VersionCommand: exec.Command("zig", "version"),
-		Compiler:       "zig",
-		OutputBinary:   "./zig.bin",
-		MakeArgs: func(testname string) []string {
-			return append(zigBaseFlags, "./"+testname+"/zig/main.zig")
-		},
-	},
-	{
-		Language:       "rust",
-		VersionCommand: exec.Command("rustc", "-V"),
-		Compiler:       "rustc",
-		OutputBinary:   "./rust.bin",
-		MakeArgs: func(testname string) []string {
-			return append(rustBaseFlags, "./"+testname+"/rust/main.rs")
-		},
-	},
 }
 
 func cFlags(testname string) []string {
@@ -83,12 +94,17 @@ func BenchmarkAll(b *testing.B) {
 	benchnames := setup()
 	for i, c := range compilers {
 		version, err := c.VersionCommand.Output()
-		if err == nil {
-			b.Logf("found compiler '%s'\n%s", c.Compiler, version)
-			compilers[i].CanRun = true
-		} else {
+		if err != nil {
 			b.Logf("skipping all benchmarks for compiler %q", c.Compiler)
+			continue
 		}
+		var ok bool
+		vMajor, vMinor, vPatch, ok := parseNextSemanticVersion(string(version))
+		if !ok {
+			b.Fatalf("unable to parse version for %s compiler from version output:\n%s", c.Compiler, version)
+		}
+		compilers[i].Version = [3]int{vMajor, vMinor, vPatch}
+		b.Logf("found compiler %s %d.%d.%d", c.Compiler, vMajor, vMinor, vPatch)
 	}
 	b.Logf("looking for benchmarks in %v", benchnames)
 	for _, testname := range benchnames {
@@ -102,7 +118,7 @@ func BenchmarkAll(b *testing.B) {
 
 		cases := strings.Split(casesJoined, "\n")
 		for _, compiler := range compilers {
-			if !compiler.CanRun {
+			if !compiler.CanRun() {
 				continue // skip compiler benchmark.
 			}
 			testDir := testname + "/" + compiler.Language
@@ -126,7 +142,7 @@ func BenchmarkAll(b *testing.B) {
 					if err != nil {
 						b.Fatalf("%s: os.Stat(%q): %s", testname, compiler.OutputBinary, err.Error())
 					}
-					b.Logf("name=%q compiler=%q binarysize=%d\n", testname, compiler.Compiler, finfo.Size())
+					b.Logf("name=%q compiler=%q binarysize=%d version=%s\n", testname, compiler.Compiler, finfo.Size(), compiler.VersionString())
 				})
 			}
 			for i := range cases {
@@ -187,4 +203,47 @@ func setup() (benchnames []string) {
 		}
 	}
 	return benchnames
+}
+
+// parseNExtSemanticVersion parses the first instance of anything that looks remotely close to a semantic version in the argument string
+// and returns the major, minor and patch version as integers.
+func parseNextSemanticVersion(s string) (int, int, int, bool) {
+	firstDotIdx := strings.IndexByte(s, '.')
+	if firstDotIdx <= 0 {
+		return -1, -1, -1, false
+	}
+	i := firstDotIdx - 1
+	for i >= 0 && isDigit(s[i]) {
+		i--
+	}
+	start := i + 1
+	vMajor, err := strconv.Atoi(s[start:firstDotIdx])
+	if err != nil {
+		return -1, -1, -1, false
+	}
+	i = firstDotIdx + 1
+	for i < len(s) && isDigit(s[i]) {
+		i++
+	}
+	secondDotIdx := i
+	if s[secondDotIdx] != '.' {
+		return -1, -1, -1, false
+	}
+	vMinor, err := strconv.Atoi(s[firstDotIdx+1 : secondDotIdx])
+	if err != nil {
+		return -1, -1, -1, false
+	}
+	i = secondDotIdx + 1
+	for i < len(s) && isDigit(s[i]) {
+		i++
+	}
+	vPatch, err := strconv.Atoi(s[secondDotIdx+1 : i])
+	if err != nil {
+		return -1, -1, -1, false
+	}
+	return vMajor, vMinor, vPatch, true
+}
+
+func isDigit(c byte) bool {
+	return c >= '0' && c <= '9'
 }

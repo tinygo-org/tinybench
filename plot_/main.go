@@ -133,6 +133,7 @@ func drawBenchmark(langs []langBench, savefile, baseCompiler string) error {
 type rawCompilerResult struct {
 	Benchmark string
 	Compiler  string
+	Version   string
 	Size      int
 	Runs      []rawCompilerBench
 }
@@ -149,6 +150,7 @@ type rawCompilerBench struct {
 type langBench struct {
 	Langname string
 	Compiler string
+	Version  string
 	Results  []benchResult
 }
 
@@ -162,6 +164,10 @@ func (cr *rawCompilerResult) Language() (langname string) {
 }
 
 func (lb *langBench) DisplayName() string {
+	return lb.SimpleName() + " " + lb.Version
+}
+
+func (lb *langBench) SimpleName() string {
 	if lb.Langname == lb.Compiler {
 		return lb.Langname
 	} else if lb.Langname == "c" {
@@ -169,7 +175,7 @@ func (lb *langBench) DisplayName() string {
 	} else if lb.Compiler == "tinygo" {
 		return "tinygo"
 	} else if lb.Compiler == "rustc" {
-		return "rust"
+		return "rustc"
 	}
 	return lb.Langname + " " + lb.Compiler
 }
@@ -215,6 +221,7 @@ func parsebench(r io.Reader, baseCompiler string) (langs []langBench, err error)
 		lang := bench.Language()
 		compiler := bench.Compiler
 		benchname := bench.Benchmark
+		version := bench.Version
 		for _, run := range bench.Runs {
 			added := false
 			result := benchResult{
@@ -236,6 +243,7 @@ func parsebench(r io.Reader, baseCompiler string) (langs []langBench, err error)
 				langs = append(langs, langBench{
 					Langname: lang,
 					Compiler: compiler,
+					Version:  version,
 					Results:  []benchResult{result},
 				})
 				if baseCompiler == compiler {
@@ -285,6 +293,7 @@ func parseBenchRaw(r io.Reader) (benchs []rawCompilerResult, err error) {
 			currentBench = &rawCompilerResult{
 				Benchmark: parseKeyValue(orig, "name"),
 				Compiler:  parseKeyValue(orig, "compiler"),
+				Version:   parseKeyValue(orig, "version"),
 				Size:      sz,
 			}
 			continue
