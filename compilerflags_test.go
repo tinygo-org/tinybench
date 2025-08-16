@@ -4,6 +4,7 @@ var gccLinkFlags = map[string][]string{
 	"rsa-keygen":    {"-lssl", "-lcrypto"}, // OpenSSL.
 	"n-body":        {"-lm"},               // Math library.
 	"n-body-nosqrt": {"-lm"},               // Math library.
+	"spectral-norm": {"-lm"},               // Math library.
 }
 
 var gccBaseFlags = []string{
