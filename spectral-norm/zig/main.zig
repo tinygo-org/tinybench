@@ -1,6 +1,6 @@
 const std = @import("std");
 const math = std.math;
-const stdout = std.io.getStdOut().writer();
+const stdout = std.debug;
 
 var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 const allocator = gpa.allocator();
@@ -66,5 +66,5 @@ pub fn main() !void {
         vv += vi * vi;
     }
 
-    try stdout.print("{d:.9}\n", .{math.sqrt(vBv / vv)});
+    stdout.print("{d:.9}\n", .{math.sqrt(vBv / vv)});
 }

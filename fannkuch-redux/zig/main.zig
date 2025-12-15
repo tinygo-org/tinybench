@@ -1,6 +1,6 @@
 const std = @import("std");
-const stdout = std.io.getStdOut().writer();
-const stderr = std.io.getStdErr().writer();
+const stdout = std.debug;
+const stderr = std.debug;
 
 var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 const allocator = gpa.allocator();
@@ -79,17 +79,17 @@ pub fn main() !void {
     defer std.process.argsFree(allocator, args);
 
     if (args.len < 2) {
-        try stderr.print("Usage: {s} <n>\n", .{args[0]});
+        stderr.print("Usage: {s} <n>\n", .{args[0]});
         return error.InvalidArgs;
     }
 
     const max_n = std.fmt.parseInt(usize, args[1], 10) catch {
-        try stderr.print("Invalid number: {s}\n", .{args[1]});
+        stderr.print("Invalid number: {s}\n", .{args[1]});
         return error.InvalidNumber;
     };
 
     if (max_n < 1 or max_n > 15) {
-        try stderr.print("n must be 1-15\n", .{});
+        stderr.print("n must be 1-15\n", .{});
         return error.InvalidRange;
     }
 
@@ -109,5 +109,5 @@ pub fn main() !void {
 
     f.tk();
 
-    try stdout.print("{d}\nPfannkuchen({d}) = {d}\n", .{ f.checksum, max_n, f.maxflips });
+    stdout.print("{d}\nPfannkuchen({d}) = {d}\n", .{ f.checksum, max_n, f.maxflips });
 }

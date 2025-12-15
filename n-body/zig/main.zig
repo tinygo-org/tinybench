@@ -1,6 +1,6 @@
 const std = @import("std");
 const math = std.math;
-const stdout = std.io.getStdOut().writer();
+const stdout = std.debug;
 
 var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 const allocator = gpa.allocator();
@@ -143,11 +143,11 @@ pub fn main() !void {
     const bodies = Bodies[0..];
 
     offsetMomentum(bodies);
-    try stdout.print("{d:.9}\n", .{energy(bodies)});
+    stdout.print("{d:.9}\n", .{energy(bodies)});
 
     for (0..n) |_| {
         advance(bodies, 0.01);
     }
 
-    try stdout.print("{d:.9}\n", .{energy(bodies)});
+    stdout.print("{d:.9}\n", .{energy(bodies)});
 }

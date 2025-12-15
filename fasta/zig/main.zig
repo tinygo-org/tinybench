@@ -1,5 +1,5 @@
 const std = @import("std");
-const stdout = std.io.getStdOut().writer();
+const stdout = std.debug;
 
 var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 const allocator = gpa.allocator();
@@ -28,8 +28,7 @@ fn repeatFasta(s: []const u8, count: usize, out: anytype) !void {
     var remaining = count;
     while (remaining > 0) {
         const line = @min(WIDTH, remaining);
-        try out.writeAll(s2[pos .. pos + line]);
-        try out.writeByte('\n');
+        out.print("{s}\n", .{s2[pos .. pos + line]});
         pos += line;
         if (pos >= s.len) pos -= s.len;
         remaining -= line;
@@ -57,7 +56,7 @@ fn randomFasta(genelist: []const AminoAcid, count: usize, out: anytype) !void {
             }
         }
         buf[line] = '\n';
-        try out.writeAll(buf[0 .. line + 1]);
+        out.print("{s}", .{buf[0 .. line + 1]});
         remaining -= line;
     }
 }
@@ -104,12 +103,12 @@ pub fn main() !void {
         "TGGTGGCGCGCGCCTGTAATCCCAGCTACTCGGGAGGCTGAGGCAGGAGAATCGCTTGAACCCGGGAGGCGG" ++
         "AGGTTGCAGTGAGCCGAGATCGCGCCACTGCACTCCAGCCTGGGCGACAGAGCGAGACTCCGTCTCAAAAA";
 
-    try stdout.writeAll(">ONE Homo sapiens alu\n");
+    stdout.print(">ONE Homo sapiens alu\n", .{});
     try repeatFasta(alu, 2 * n, stdout);
 
-    try stdout.writeAll(">TWO IUB ambiguity codes\n");
+    stdout.print(">TWO IUB ambiguity codes\n", .{});
     try randomFasta(iub[0..], 3 * n, stdout);
 
-    try stdout.writeAll(">THREE Homo sapiens frequency\n");
+    stdout.print(">THREE Homo sapiens frequency\n", .{});
     try randomFasta(homosapiens[0..], 5 * n, stdout);
 }
