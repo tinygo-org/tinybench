@@ -72,11 +72,9 @@ fn random_fasta(genelist: &[AminoAcid], count: usize, out: &mut dyn Write) {
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    let n = if args.len() > 1 {
-        args[1].parse::<usize>().unwrap_or(0)
-    } else {
-        0
+    let n = match env::args().nth(1) {
+        Some(s) => s.parse::<usize>().unwrap_or(0),
+        None => 0,
     };
 
     let mut iub = [

@@ -95,21 +95,26 @@ impl Pfannkuch {
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 2 {
-        eprintln!(
-            "usage: {} number",
-            args.get(0).map_or("fannkuch_redux_rust", |s| s.as_str())
-        );
-        process::exit(1);
-    }
+    let mut args = env::args();
+
+    let prog_name = args.next();
+
+    let num_str = match args.next() {
+        Some(number_str) => number_str,
+        None => {
+            // no number argument
+            let name = prog_name.unwrap_or("fannkuch_redux_rust".to_string());
+            eprintln!("usage: {name} number");
+            process::exit(1);
+        }
+    };
 
     let mut pf = Pfannkuch::default(); // zero initialize by default
 
-    match args[1].parse::<u32>() {
+    match num_str.parse::<u32>() {
         Ok(n) => pf.max_n = n,
         Err(_) => {
-            eprintln!("Error: '{}' is not a valid number.", args[1]);
+            eprintln!("Error: '{num_str}' is not a valid number.");
             process::exit(1);
         }
     }

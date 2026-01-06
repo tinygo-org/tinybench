@@ -34,11 +34,11 @@ fn a_times_transp(v: &mut [f64], u: &[f64]) {
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    let n: usize = if args.len() > 1 {
-        args[1].parse().unwrap_or(0)
-    } else {
-        0
+    let mut args = env::args();
+    let prog = args.next();
+    let n: usize = match args.next() {
+        Some(s) => s.parse().unwrap_or(0),
+        None => 0,
     };
 
     let mut u = vec![1.0; n];

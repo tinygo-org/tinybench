@@ -142,31 +142,29 @@ fn initial_bodies() -> [Planet; NBODIES] {
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 2 {
-        eprintln!(
-            "Usage: {} <number_of_steps>",
-            args.get(0).map_or("nbody_rust", |s| s.as_str())
-        );
-        process::exit(1);
-    }
+    let mut args = env::args();
+    let prog = args.next();
 
-    let n_steps: usize = match args[1].parse() {
-        Ok(n) => n,
-        Err(_) => {
-            eprintln!("Error: Could not parse number of steps '{}'", args[1]);
+    let n_steps: usize = match args.next() {
+        Some(s) => match s.parse() {
+            Ok(n) => n,
+            Err(_) => {
+                eprintln!("Error: Could not parse number of steps '{}'", s);
+                process::exit(1);
+            }
+        },
+        None => {
+            let prog_name = prog.as_deref().unwrap_or("nbody_rust");
+            eprintln!("Usage: {} <number_of_steps>", prog_name);
             process::exit(1);
         }
     };
 
     let mut bodies_arr = initial_bodies();
     offset_momentum(&mut bodies_arr);
-
     println!("{:.9}", energy(&bodies_arr));
-
     for _ in 0..n_steps {
         advance(&mut bodies_arr, 0.01);
     }
-
     println!("{:.9}", energy(&bodies_arr));
 }
