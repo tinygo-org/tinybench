@@ -98,10 +98,22 @@ fn main() {
     ];
 
     let mut homosapiens = [
-        AminoAcid { p: 0.3029549426680, c: b'a' },
-        AminoAcid { p: 0.1979883004921, c: b'c' },
-        AminoAcid { p: 0.1975473066391, c: b'g' },
-        AminoAcid { p: 0.3015094502008, c: b't' },
+        AminoAcid {
+            p: 0.3029549426680,
+            c: b'a',
+        },
+        AminoAcid {
+            p: 0.1979883004921,
+            c: b'c',
+        },
+        AminoAcid {
+            p: 0.1975473066391,
+            c: b'g',
+        },
+        AminoAcid {
+            p: 0.3015094502008,
+            c: b't',
+        },
     ];
 
     accumulate_probabilities(&mut iub);
