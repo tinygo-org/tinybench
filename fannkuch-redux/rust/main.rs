@@ -27,7 +27,7 @@ impl Pfannkuch {
 
     fn flip(&mut self) -> i32 {
         let mut flips_count = 1;
-        
+
         let current_max_n = self.max_n as usize;
         self.t[..current_max_n].copy_from_slice(&self.s[..current_max_n]);
 
@@ -41,7 +41,7 @@ impl Pfannkuch {
                 y -= 1;
             }
             flips_count += 1;
-            
+
             if self.t[self.t[0] as usize] == 0 {
                 break;
             }
@@ -62,10 +62,10 @@ impl Pfannkuch {
     fn tk(&mut self, n_param: i32) {
         let mut p_count = 0; // Permutation counter index, Go's 'i' in tk
         let mut c_perm_counts = [0 as Elem; 16]; // Permutation counts, Go's 'c' in tk
-        
+
         while p_count < n_param {
-            self.rotate(p_count); 
-            
+            self.rotate(p_count);
+
             let p_count_usize = p_count as usize;
 
             if c_perm_counts[p_count_usize] >= p_count as Elem {
@@ -75,13 +75,13 @@ impl Pfannkuch {
             }
 
             c_perm_counts[p_count_usize] += 1;
-            p_count = 1; 
-            
-            self.odd = !self.odd; 
+            p_count = 1;
+
+            self.odd = !self.odd;
 
             if self.s[0] != 0 {
                 let mut f = 1;
-                if self.s[self.s[0] as usize] != 0 { 
+                if self.s[self.s[0] as usize] != 0 {
                     f = self.flip();
                 }
 
@@ -89,9 +89,11 @@ impl Pfannkuch {
                     self.maxflips = f;
                 }
 
-                if self.odd != 0 { // If odd is -1
+                if self.odd != 0 {
+                    // If odd is -1
                     self.checksum -= f;
-                } else { // If odd is 0
+                } else {
+                    // If odd is 0
                     self.checksum += f;
                 }
             }
@@ -102,12 +104,15 @@ impl Pfannkuch {
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
-        eprintln!("usage: {} number", args.get(0).map_or("fannkuch_redux_rust", |s| s.as_str()));
+        eprintln!(
+            "usage: {} number",
+            args.get(0).map_or("fannkuch_redux_rust", |s| s.as_str())
+        );
         process::exit(1);
     }
 
     let mut pf = Pfannkuch::new();
-    
+
     match args[1].parse::<i32>() {
         Ok(n) => pf.max_n = n,
         Err(_) => {
@@ -127,5 +132,8 @@ fn main() {
 
     pf.tk(pf.max_n);
 
-    println!("{}\nPfannkuchen({}) = {}", pf.checksum, pf.max_n, pf.maxflips);
+    println!(
+        "{}\nPfannkuchen({}) = {}",
+        pf.checksum, pf.max_n, pf.maxflips
+    );
 }
