@@ -12,6 +12,20 @@ Benchmarks for comparing TinyGo performance.
 
 ![Benchmarks](./benchmark.png)
 
+## Benchmark code design
+Benchmarks are designed "fairly" and with a focus on runtime performance. In the context of tinybench this means maintaining code equivalnce between languages:
+
+- Maintaining equivalence in data structures
+- Maintaining equivalence in function signatures, their statements and ordering
+
+We avoid:
+
+- Explicitly moving code to compile-time when we can't do the same in other languages i.e Zig's comptime and C macros
+
+We allow:
+
+- Data structure massaging. C and Zig allow bitpacking which is a commonly used feature in the languages and affects runtime performance, thus should be interesting to allow use.
+
 ## Compilers
 
 - [clang](https://clang.llvm.org/)
