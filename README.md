@@ -7,13 +7,13 @@ Benchmarks for comparing TinyGo performance.
 - `fannkuch-redux`: Focused on integer operations on short arrays
 - `fasta`: Generate and write random DNA sequences. This benchmark makes some use of dynamic memory allocation, thus putting Go's GC to test as well as Zig's allocator.
 - `n-body`: Floating point operations and usage of math library (sqrt)
-- `n-body-nosqrt`: Identical to above but replaces call to square-root math library function with a iterative solution. This benchmark shows the difference between C and Go math standard libraries. Go math library has more overhead for assembly implemented functions.
+- `n-body-nosqrt`: Identical to above but replaces call to square-root math library function with an iterative solution. This benchmark shows the difference between C and Go math standard libraries. Go math library has more overhead for assembly implemented functions.
 - `spectral-norm`: Eigenvalue using the power method. This benchmark makes extensive use of dynamic memory allocation.
 
 ![Benchmarks](./benchmark.png)
 
 ## Benchmark code design
-Benchmarks are designed "fairly" and with a focus on runtime performance. In the context of tinybench this means maintaining code equivalnce between languages:
+Benchmarks are designed "fairly" and with a focus on runtime performance. In the context of tinybench this means maintaining code equivalence between languages:
 
 - Maintaining equivalence in data structures
 - Maintaining equivalence in function signatures, their statements and ordering
@@ -282,7 +282,7 @@ ok  	tinybench	180.529s
 
 ## Add a benchmark
 
-The way tinybench works is all directories with no `.` or `_` character (anywhere in name) in this repos' root directory are added to the benchmark corpus.
+The way tinybench works is all directories with no `.` or `_` character (anywhere in name) in this repo's root directory are added to the benchmark corpus.
 Within each of these directories a `c` and `go` folder is searched for and their code compiled and run automatically. Flags used for the compilers can be found in [`compilerflags_test.go`](./compilerflags_test.go).
 
 To add a new test follow these steps:
@@ -292,7 +292,7 @@ To add a new test follow these steps:
 2. Add an `args.txt` file to the folder with the OS arguments to the program and add a single line with an argument i.e: `-s 1024` (flag `s` with value `1024`).
     - Each line of this file will contain a benchmark case.
 
-3. Create folders with the language you wish to test. Each will be run with arguments provided by `args.txt`. Each folder should contain a single file called `main.<extension>` where `<extension>` is the file extension of the language being teste.
+3. Create folders with the language you wish to test. Each will be run with arguments provided by `args.txt`. Each folder should contain a single file called `main.<extension>` where `<extension>` is the file extension of the language being tested.
     - `<benchmark-name>/c/main.c`: Contains the C source code for benchmark. Since linking is done via flags you must add your project's flags to `gccFlags` map.
     - `<benchmark-name>/go/main.go`: Will contain a `package main` project that is compiled for the benchmark.
     - `<benchmark-name>/rust/main.rs`: Contains the Rust source code for benchmark.
