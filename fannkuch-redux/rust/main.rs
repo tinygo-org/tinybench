@@ -1,35 +1,25 @@
 use std::env;
 use std::process;
 
-type Elem = i32;
+type Elem = u32;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 struct Pfannkuch {
     s: [Elem; 16],
     t: [Elem; 16],
-    maxflips: i32,
-    max_n: i32,
-    odd: i32,
+    maxflips: u32,
+    max_n: u32,
+    odd: u32,
     checksum: i32,
 }
 
 impl Pfannkuch {
-    fn new() -> Self {
-        Pfannkuch {
-            s: [0; 16],
-            t: [0; 16],
-            maxflips: 0,
-            max_n: 0,
-            odd: 0, // Initialized to 0
-            checksum: 0,
+    fn flip(&mut self, n_param: u32) -> u32 {
+        for i in 0..(n_param as usize) {
+            self.t[i] = self.s[i];
         }
-    }
 
-    fn flip(&mut self) -> i32 {
         let mut flips_count = 1;
-        
-        let current_max_n = self.max_n as usize;
-        self.t[..current_max_n].copy_from_slice(&self.s[..current_max_n]);
 
         loop {
             let mut x: usize = 0;
@@ -40,16 +30,18 @@ impl Pfannkuch {
                 x += 1;
                 y -= 1;
             }
+
             flips_count += 1;
-            
+
             if self.t[self.t[0] as usize] == 0 {
                 break;
             }
         }
+
         flips_count
     }
 
-    fn rotate(&mut self, n: i32) {
+    fn rotate(&mut self, n: u32) {
         let c = self.s[0];
         let n_usize = n as usize;
         for i in 0..n_usize {
@@ -59,13 +51,13 @@ impl Pfannkuch {
     }
 
     // n_param is self.max_n from main, which is the N for Fannkuch.
-    fn tk(&mut self, n_param: i32) {
+    fn tk(&mut self, n_param: u32) {
         let mut p_count = 0; // Permutation counter index, Go's 'i' in tk
         let mut c_perm_counts = [0 as Elem; 16]; // Permutation counts, Go's 'c' in tk
-        
+
         while p_count < n_param {
-            self.rotate(p_count); 
-            
+            self.rotate(p_count);
+
             let p_count_usize = p_count as usize;
 
             if c_perm_counts[p_count_usize] >= p_count as Elem {
@@ -75,24 +67,27 @@ impl Pfannkuch {
             }
 
             c_perm_counts[p_count_usize] += 1;
-            p_count = 1; 
-            
-            self.odd = !self.odd; 
+            p_count = 1;
+            self.odd = !self.odd;
 
-            if self.s[0] != 0 {
+            let idx = self.s[0] as usize;
+            if idx != 0 {
                 let mut f = 1;
-                if self.s[self.s[0] as usize] != 0 { 
-                    f = self.flip();
+
+                if self.s[idx] != 0 {
+                    f = self.flip(n_param);
                 }
 
                 if f > self.maxflips {
                     self.maxflips = f;
                 }
 
-                if self.odd != 0 { // If odd is -1
-                    self.checksum -= f;
-                } else { // If odd is 0
-                    self.checksum += f;
+                if self.odd != 0 {
+                    // not odd
+                    self.checksum -= f as i32;
+                } else {
+                    // odd
+                    self.checksum += f as i32;
                 }
             }
         }
@@ -100,18 +95,26 @@ impl Pfannkuch {
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 2 {
-        eprintln!("usage: {} number", args.get(0).map_or("fannkuch_redux_rust", |s| s.as_str()));
-        process::exit(1);
-    }
+    let mut args = env::args();
 
-    let mut pf = Pfannkuch::new();
-    
-    match args[1].parse::<i32>() {
+    let prog_name = args.next();
+
+    let num_str = match args.next() {
+        Some(number_str) => number_str,
+        None => {
+            // no number argument
+            let name = prog_name.unwrap_or("fannkuch_redux_rust".to_string());
+            eprintln!("usage: {name} number");
+            process::exit(1);
+        }
+    };
+
+    let mut pf = Pfannkuch::default(); // zero initialize by default
+
+    match num_str.parse::<u32>() {
         Ok(n) => pf.max_n = n,
         Err(_) => {
-            eprintln!("Error: '{}' is not a valid number.", args[1]);
+            eprintln!("Error: '{num_str}' is not a valid number.");
             process::exit(1);
         }
     }
@@ -127,5 +130,8 @@ fn main() {
 
     pf.tk(pf.max_n);
 
-    println!("{}\nPfannkuchen({}) = {}", pf.checksum, pf.max_n, pf.maxflips);
+    println!(
+        "{}\nPfannkuchen({}) = {}",
+        pf.checksum, pf.max_n, pf.maxflips
+    );
 }
