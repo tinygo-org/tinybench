@@ -199,6 +199,9 @@ func setup() (benchnames []string) {
 			if strings.ContainsAny(name, "._") {
 				continue // skip
 			}
+			if _, err := os.Stat(name + "/args.txt"); err != nil {
+				continue // skip directories without args.txt
+			}
 			benchnames = append(benchnames, name)
 		}
 	}
