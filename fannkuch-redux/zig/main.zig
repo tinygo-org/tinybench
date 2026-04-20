@@ -2,9 +2,6 @@ const std = @import("std");
 const stdout = std.debug;
 const stderr = std.debug;
 
-var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-const allocator = gpa.allocator();
-
 const Fannkuchen = struct {
     s: [16]i64,
     t: [16]i64,
@@ -74,19 +71,16 @@ const Fannkuchen = struct {
     }
 };
 
-pub fn main() !void {
-    const args = try std.process.argsAlloc(allocator);
-    defer std.process.argsFree(allocator, args);
+pub fn main(init: std.process.Init) !void {
+    const allocator = init.gpa;
 
-    if (args.len < 2) {
-        stderr.print("Usage: {s} <n>\n", .{args[0]});
-        return error.InvalidArgs;
-    }
+    var it = try init.minimal.args.iterateAllocator(allocator);
+    defer it.deinit();
 
-    const max_n = std.fmt.parseInt(usize, args[1], 10) catch {
-        stderr.print("Invalid number: {s}\n", .{args[1]});
-        return error.InvalidNumber;
-    };
+    _ = it.skip(); // program name
+
+    const arg = it.next() orelse return error.MissingArgs;
+    const max_n = try std.fmt.parseInt(usize, arg, 10);
 
     if (max_n < 1 or max_n > 15) {
         stderr.print("n must be 1-15\n", .{});

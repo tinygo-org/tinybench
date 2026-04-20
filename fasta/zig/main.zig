@@ -1,9 +1,6 @@
 const std = @import("std");
 const stdout = std.debug;
 
-var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-const allocator = gpa.allocator();
-
 const WIDTH = 60;
 
 const AminoAcid = struct {
@@ -17,7 +14,7 @@ fn accumulateProbabilities(genelist: []AminoAcid) void {
     }
 }
 
-fn repeatFasta(s: []const u8, count: usize, out: anytype) !void {
+fn repeatFasta(allocator: std.mem.Allocator, s: []const u8, count: usize, out: anytype) !void {
     var pos: usize = 0;
     var s2 = try allocator.alloc(u8, s.len + WIDTH);
     defer allocator.free(s2);
@@ -61,13 +58,18 @@ fn randomFasta(genelist: []const AminoAcid, count: usize, out: anytype) !void {
     }
 }
 
-pub fn main() !void {
-    const args = try std.process.argsAlloc(allocator);
-    defer std.process.argsFree(allocator, args);
+pub fn main(init: std.process.Init) !void {
+    const allocator = init.gpa;
 
-    var n: usize = 0;
-    if (args.len > 1) {
-        n = std.fmt.parseInt(usize, args[1], 10) catch 0;
+    var it = try init.minimal.args.iterateAllocator(allocator);
+    defer it.deinit();
+
+    _ = it.skip(); // program name
+
+    const arg = it.next() orelse return error.MissingArgs;
+    const max_n = try std.fmt.parseInt(usize, arg, 10);
+    if (max_n < 1 or max_n > 50000000) {
+        return error.InvalidRange;
     }
 
     var iub = [_]AminoAcid{
@@ -104,11 +106,11 @@ pub fn main() !void {
         "AGGTTGCAGTGAGCCGAGATCGCGCCACTGCACTCCAGCCTGGGCGACAGAGCGAGACTCCGTCTCAAAAA";
 
     stdout.print(">ONE Homo sapiens alu\n", .{});
-    try repeatFasta(alu, 2 * n, stdout);
+    try repeatFasta(allocator, alu, 2 * max_n, stdout);
 
     stdout.print(">TWO IUB ambiguity codes\n", .{});
-    try randomFasta(iub[0..], 3 * n, stdout);
+    try randomFasta(iub[0..], 3 * max_n, stdout);
 
     stdout.print(">THREE Homo sapiens frequency\n", .{});
-    try randomFasta(homosapiens[0..], 5 * n, stdout);
+    try randomFasta(homosapiens[0..], 5 * max_n, stdout);
 }

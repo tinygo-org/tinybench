@@ -2,9 +2,6 @@ const std = @import("std");
 const math = std.math;
 const stdout = std.debug;
 
-var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-const allocator = gpa.allocator();
-
 const pi = 3.141592653589793;
 const solarMass = 4 * pi * pi;
 const daysPerYear = 365.24;
@@ -148,15 +145,16 @@ var Bodies = [_]Planet{
     },
 };
 
-pub fn main() !void {
-    const args = try std.process.argsAlloc(allocator);
+pub fn main(init: std.process.Init) !void {
+    const allocator = init.gpa;
 
-    if (args.len < 2) {
-        std.debug.print("Usage: {s} <iterations>\n", .{args[0]});
-        return error.InvalidArgs;
-    }
+    var it = try init.minimal.args.iterateAllocator(allocator);
+    defer it.deinit();
 
-    const n = try std.fmt.parseInt(usize, args[1], 10);
+    _ = it.skip(); // program name
+
+    const arg = it.next() orelse return error.MissingArgs;
+    const n = try std.fmt.parseInt(usize, arg, 10);
     const bodies = Bodies[0..];
 
     offsetMomentum(bodies);
