@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
+
 
 /* this depends highly on the platform.  It might be faster to use
    char type on 32-bit systems; it might be faster to use unsigned. */
@@ -73,25 +75,26 @@ void tk(pfannkuch* pf)
    }
 }
 
-int main(int argc, char **v)
+int main(int argc, char **argv)
 {
    int i;
 
    if (argc < 2) {
-      fprintf(stderr, "usage: %s number\n", v[0]);
+      fprintf(stderr, "usage: %s number\n", argv[0]);
       exit(1);
    }
    pfannkuch pf = {};
-   pf.max_n = atoi(v[1]);
-   if ( pf.max_n < 3 || pf.max_n > 15) {
+   pf.max_n = atoi(argv[1]);
+   int verify = argc > 2 && strcmp(argv[2], "v") == 0;
+   if (pf.max_n < 3 || pf.max_n > 15) {
       fprintf(stderr, "range: must be 3 <= n <= 12\n");
       exit(1);
    }
 
    for (i = 0; i < pf.max_n; i++) pf.s[i] = i;
    tk(&pf);
-
-   printf("%d\nPfannkuchen(%d) = %d\n", pf.checksum, pf.max_n, pf.maxflips);
-
+   if (verify) {
+      printf("%d\nPfannkuchen(%d) = %d\n", pf.checksum, pf.max_n, pf.maxflips);
+   }
    return 0;
 }

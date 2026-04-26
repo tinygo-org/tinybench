@@ -41,6 +41,8 @@ fn main() {
         None => 0,
     };
 
+    let verify = args.next().as_deref() == Some("v");
+
     let mut u = vec![1.0; n];
     let mut v = vec![1.0; n];
 
@@ -56,5 +58,8 @@ fn main() {
         vv += v[i] * v[i];
     }
 
-    println!("{:.9}", (vBv / vv).sqrt());
+    let answer = (vBv / vv).sqrt();
+    if verify {
+        println!("{:.9}", answer);
+    }
 }

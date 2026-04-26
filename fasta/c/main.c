@@ -28,27 +28,30 @@ static void accumulate_probabilities(AminoAcid* genelist, int len) {
     }
 }
 
-static void repeat_fasta(const char* s, int slen, int count, FILE* out) {
+static void repeat_fasta(const char* s, int slen, int count, FILE* out, int verify) {
     int pos = 0;
     char s2[WIDTH + slen];
     memcpy(s2, s, slen);
     memcpy(s2 + slen, s, WIDTH);
     while (count > 0) {
         int line = min(WIDTH, count);
-        fwrite(s2 + pos, 1, line, out);
-        fputc('\n', out);
+        if (verify) {
+            fwrite(s2 + pos, 1, line, out);
+            fputc('\n', out);
+        }
         pos += line;
         if (pos >= slen) pos -= slen;
         count -= line;
     }
 }
 
+
 static uint32_t lastrandom = 42;
 #define IM 139968
 #define IA 3877
 #define IC 29573
 
-static void random_fasta(AminoAcid* genelist, int len, int count, FILE* out) {
+static void random_fasta(AminoAcid* genelist, int len, int count, FILE* out, int verify) {
     char buf[WIDTH + 1];
     while (count > 0) {
         int line = min(WIDTH, count);
@@ -63,7 +66,9 @@ static void random_fasta(AminoAcid* genelist, int len, int count, FILE* out) {
             }
         }
         buf[line] = '\n';
-        fwrite(buf, 1, line + 1, out);
+        if (verify) {
+            fwrite(buf, 1, line + 1, out);
+        }
         count -= line;
     }
 }
@@ -73,6 +78,7 @@ int main(int argc, char* argv[]) {
     if (argc > 1) {
         n = atoi(argv[1]);
     }
+    int verify = argc > 2 && strcmp(argv[2], "v") == 0;
 
     AminoAcid iub[] = {
         {0.27, 'a'}, {0.12, 'c'}, {0.12, 'g'}, {0.27, 't'},
@@ -102,14 +108,11 @@ int main(int argc, char* argv[]) {
         "AGGCGGAGGTTGCAGTGAGCCGAGATCGCGCCACTGCACTCC"
         "AGCCTGGGCGACAGAGCGAGACTCCGTCTCAAAAA";
 
-    printf(">ONE Homo sapiens alu\n");
-    repeat_fasta(alu, strlen(alu), 2 * n, stdout);
-
-    printf(">TWO IUB ambiguity codes\n");
-    random_fasta(iub, iub_len, 3 * n, stdout);
-
-    printf(">THREE Homo sapiens frequency\n");
-    random_fasta(homosapiens, homosapiens_len, 5 * n, stdout);
-
+    if (verify) printf(">ONE Homo sapiens alu\n");
+    repeat_fasta(alu, strlen(alu), 2 * n, stdout, verify);
+    if (verify) printf(">TWO IUB ambiguity codes\n");
+    random_fasta(iub, iub_len, 3 * n, stdout, verify);
+    if (verify) printf(">THREE Homo sapiens frequency\n");
+    random_fasta(homosapiens, homosapiens_len, 5 * n, stdout, verify);
     return 0;
 }

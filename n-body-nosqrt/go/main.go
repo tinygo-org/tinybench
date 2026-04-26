@@ -8,16 +8,16 @@ import (
 )
 
 const (
-	pi          = 3.141592653589793
+	pi		  = 3.141592653589793
 	solarMass   = 4 * pi * pi
 	daysPerYear = 365.24
-	tol         = 1e-5
+	tol		 = 1e-5
 )
 
 type Planet struct {
-	x, y, z    float64
+	x, y, z	float64
 	vx, vy, vz float64
-	mass       float64
+	mass	   float64
 }
 
 func sqrt_newton(a, tol float64) float64 {
@@ -138,11 +138,27 @@ var bodies = [nbodies]Planet{
 }
 
 func main() {
-	n, _ := strconv.Atoi(os.Args[1])
+	if len(os.Args) < 2 {
+		fmt.Fprintf(os.Stderr, "Usage: %s <number_of_steps>\n", os.Args[0])
+		os.Exit(1)
+	}
+	n, err := strconv.Atoi(os.Args[1])
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Could not parse number of steps '%s'\n", os.Args[1])
+		os.Exit(1)
+	}
+	verify := len(os.Args) > 2 && os.Args[2] == "v"
+
 	offsetMomentum(nbodies, bodies[:])
-	fmt.Printf("%.9f\n", energy(nbodies, bodies[:]))
+	startEnergy := energy(nbodies, bodies[:])
+	if verify {
+		fmt.Printf("%.9f\n", startEnergy)
+	}
 	for i := 1; i <= n; i++ {
 		advance(nbodies, bodies[:], 0.01)
 	}
-	fmt.Printf("%.9f\n", energy(nbodies, bodies[:]))
+	endEnergy := energy(nbodies, bodies[:])
+	if verify {
+		fmt.Printf("%.9f\n", endEnergy)
+	}
 }

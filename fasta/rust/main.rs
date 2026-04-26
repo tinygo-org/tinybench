@@ -23,7 +23,7 @@ fn accumulate_probabilities(genelist: &mut [AminoAcid]) {
     }
 }
 
-fn repeat_fasta(s: &[u8], count: usize, out: &mut dyn Write) {
+fn repeat_fasta(s: &[u8], count: usize, out: &mut dyn Write, verify: bool) {
     let slen = s.len();
     let mut s2 = Vec::with_capacity(slen + WIDTH);
     s2.extend_from_slice(s);
@@ -32,8 +32,10 @@ fn repeat_fasta(s: &[u8], count: usize, out: &mut dyn Write) {
     let mut remaining = count;
     while remaining > 0 {
         let line = WIDTH.min(remaining);
-        out.write_all(&s2[pos..pos + line]).unwrap();
-        out.write_all(b"\n").unwrap();
+        if verify {
+            out.write_all(&s2[pos..pos + line]).unwrap();
+            out.write_all(b"\n").unwrap();
+        }
         pos += line;
         if pos >= slen {
             pos -= slen;
@@ -47,7 +49,7 @@ const IM: u32 = 139968;
 const IA: u32 = 3877;
 const IC: u32 = 29573;
 
-fn random_fasta(genelist: &[AminoAcid], count: usize, out: &mut dyn Write) {
+fn random_fasta(genelist: &[AminoAcid], count: usize, out: &mut dyn Write, verify: bool) {
     let mut buf = vec![0u8; WIDTH + 1];
     let mut remaining = count;
     while remaining > 0 {
@@ -66,16 +68,22 @@ fn random_fasta(genelist: &[AminoAcid], count: usize, out: &mut dyn Write) {
             }
         }
         buf[line] = b'\n';
-        out.write_all(&buf[..line + 1]).unwrap();
+        if verify {
+            out.write_all(&buf[..line + 1]).unwrap();
+        }
         remaining -= line;
     }
 }
 
 fn main() {
-    let n = match env::args().nth(1) {
+    let mut args = env::args();
+    let _prog_name = args.next();
+    let n = match args.next() {
         Some(s) => s.parse::<usize>().unwrap_or(0),
         None => 0,
     };
+
+    let verify = args.next().as_deref() == Some("v");
 
     let mut iub = [
         AminoAcid { p: 0.27, c: b'a' },
@@ -128,12 +136,16 @@ AGCCTGGGCGACAGAGCGAGACTCCGTCTCAAAAA";
     let stdout = io::stdout();
     let mut out = stdout.lock();
 
-    out.write_all(b">ONE Homo sapiens alu\n").unwrap();
-    repeat_fasta(alu, 2 * n, &mut out);
-
-    out.write_all(b">TWO IUB ambiguity codes\n").unwrap();
-    random_fasta(&iub, 3 * n, &mut out);
-
-    out.write_all(b">THREE Homo sapiens frequency\n").unwrap();
-    random_fasta(&homosapiens, 5 * n, &mut out);
+    if verify {
+        out.write_all(b">ONE Homo sapiens alu\n").unwrap();
+    }
+    repeat_fasta(alu, 2 * n, &mut out, verify);
+    if verify {
+        out.write_all(b">TWO IUB ambiguity codes\n").unwrap();
+    }
+    random_fasta(&iub, 3 * n, &mut out, verify);
+    if verify {
+        out.write_all(b">THREE Homo sapiens frequency\n").unwrap();
+    }
+    random_fasta(&homosapiens, 5 * n, &mut out, verify);
 }

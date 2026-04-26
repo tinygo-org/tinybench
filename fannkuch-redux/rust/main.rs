@@ -103,11 +103,13 @@ fn main() {
         Some(number_str) => number_str,
         None => {
             // no number argument
-            let name = prog_name.unwrap_or("fannkuch_redux_rust".to_string());
+            let name = prog_name.as_deref().unwrap_or("fannkuch_redux_rust");
             eprintln!("usage: {name} number");
             process::exit(1);
         }
     };
+
+    let verify = args.next().as_deref() == Some("v");
 
     let mut pf = Pfannkuch::default(); // zero initialize by default
 
@@ -129,9 +131,10 @@ fn main() {
     }
 
     pf.tk(pf.max_n);
-
-    println!(
-        "{}\nPfannkuchen({}) = {}",
-        pf.checksum, pf.max_n, pf.maxflips
-    );
+    if verify {
+        println!(
+            "{}\nPfannkuchen({}) = {}",
+            pf.checksum, pf.max_n, pf.maxflips
+        );
+    }
 }

@@ -82,6 +82,9 @@ pub fn main(init: std.process.Init) !void {
     const arg = it.next() orelse return error.MissingArgs;
     const max_n = try std.fmt.parseInt(usize, arg, 10);
 
+    const verify_arg = it.next();
+    const verify = verify_arg != null and std.mem.eql(u8, verify_arg.?, "v");
+
     if (max_n < 1 or max_n > 15) {
         stderr.print("n must be 1-15\n", .{});
         return error.InvalidRange;
@@ -103,5 +106,7 @@ pub fn main(init: std.process.Init) !void {
 
     f.tk();
 
-    stdout.print("{d}\nPfannkuchen({d}) = {d}\n", .{ f.checksum, max_n, f.maxflips });
+    if (verify) {
+        stdout.print("{d}\nPfannkuchen({d}) = {d}\n", .{ f.checksum, max_n, f.maxflips });
+    }
 }

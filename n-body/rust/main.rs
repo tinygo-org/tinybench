@@ -143,28 +143,34 @@ fn initial_bodies() -> [Planet; NBODIES] {
 
 fn main() {
     let mut args = env::args();
-    let prog = args.next();
-
-    let n_steps: usize = match args.next() {
+    let prog_name = args.next();
+    let steps = args.next();
+    let verify = args.next().as_deref() == Some("v");
+    let n_steps: usize = match steps {
+        None => {
+            let name = prog_name.as_deref().unwrap_or("nbody_rust");
+            eprintln!("Usage: {name} <number_of_steps>");
+            process::exit(1);
+        }
         Some(s) => match s.parse() {
             Ok(n) => n,
             Err(_) => {
-                eprintln!("Error: Could not parse number of steps '{}'", s);
+                eprintln!("Error: Could not parse number of steps '{s}'");
                 process::exit(1);
             }
         },
-        None => {
-            let prog_name = prog.as_deref().unwrap_or("nbody_rust");
-            eprintln!("Usage: {} <number_of_steps>", prog_name);
-            process::exit(1);
-        }
     };
-
     let mut bodies_arr = initial_bodies();
     offset_momentum(&mut bodies_arr);
-    println!("{:.9}", energy(&bodies_arr));
+    let starting_energy = energy(&bodies_arr);
+    if verify {
+        println!("{:.9}", starting_energy);
+    }
     for _ in 0..n_steps {
         advance(&mut bodies_arr, 0.01);
     }
-    println!("{:.9}", energy(&bodies_arr));
+    let ending_energy = energy(&bodies_arr);
+    if verify {
+        println!("{:.9}", ending_energy);
+    }
 }

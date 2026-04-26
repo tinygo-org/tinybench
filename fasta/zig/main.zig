@@ -14,7 +14,7 @@ fn accumulateProbabilities(genelist: []AminoAcid) void {
     }
 }
 
-fn repeatFasta(allocator: std.mem.Allocator, s: []const u8, count: usize, out: anytype) !void {
+fn repeatFasta(allocator: std.mem.Allocator, s: []const u8, count: usize, out: anytype, verify: bool) !void {
     var pos: usize = 0;
     var s2 = try allocator.alloc(u8, s.len + WIDTH);
     defer allocator.free(s2);
@@ -25,7 +25,9 @@ fn repeatFasta(allocator: std.mem.Allocator, s: []const u8, count: usize, out: a
     var remaining = count;
     while (remaining > 0) {
         const line = @min(WIDTH, remaining);
-        out.print("{s}\n", .{s2[pos .. pos + line]});
+        if (verify) {
+            out.print("{s}\n", .{s2[pos .. pos + line]});
+        }
         pos += line;
         if (pos >= s.len) pos -= s.len;
         remaining -= line;
@@ -37,7 +39,7 @@ const IM: u32 = 139968;
 const IA: u32 = 3877;
 const IC: u32 = 29573;
 
-fn randomFasta(genelist: []const AminoAcid, count: usize, out: anytype) !void {
+fn randomFasta(genelist: []const AminoAcid, count: usize, out: anytype, verify: bool) !void {
     var buf: [WIDTH + 1]u8 = undefined;
     var remaining = count;
     while (remaining > 0) {
@@ -53,7 +55,9 @@ fn randomFasta(genelist: []const AminoAcid, count: usize, out: anytype) !void {
             }
         }
         buf[line] = '\n';
-        out.print("{s}", .{buf[0 .. line + 1]});
+        if (verify) {
+            out.print("{s}", .{buf[0 .. line + 1]});
+        }
         remaining -= line;
     }
 }
@@ -71,6 +75,9 @@ pub fn main(init: std.process.Init) !void {
     if (max_n < 1 or max_n > 50000000) {
         return error.InvalidRange;
     }
+
+    const verify_arg = it.next();
+    const verify = verify_arg != null and std.mem.eql(u8, verify_arg.?, "v");
 
     var iub = [_]AminoAcid{
         AminoAcid{ .p = 0.27, .c = 'a' },
@@ -105,12 +112,12 @@ pub fn main(init: std.process.Init) !void {
         "TGGTGGCGCGCGCCTGTAATCCCAGCTACTCGGGAGGCTGAGGCAGGAGAATCGCTTGAACCCGGGAGGCGG" ++
         "AGGTTGCAGTGAGCCGAGATCGCGCCACTGCACTCCAGCCTGGGCGACAGAGCGAGACTCCGTCTCAAAAA";
 
-    stdout.print(">ONE Homo sapiens alu\n", .{});
-    try repeatFasta(allocator, alu, 2 * max_n, stdout);
+    if (verify) stdout.print(">ONE Homo sapiens alu\n", .{});
+    try repeatFasta(allocator, alu, 2 * max_n, stdout, verify);
 
-    stdout.print(">TWO IUB ambiguity codes\n", .{});
-    try randomFasta(iub[0..], 3 * max_n, stdout);
+    if (verify) stdout.print(">TWO IUB ambiguity codes\n", .{});
+    try randomFasta(iub[0..], 3 * max_n, stdout, verify);
 
-    stdout.print(">THREE Homo sapiens frequency\n", .{});
-    try randomFasta(homosapiens[0..], 5 * max_n, stdout);
+    if (verify) stdout.print(">THREE Homo sapiens frequency\n", .{});
+    try randomFasta(homosapiens[0..], 5 * max_n, stdout, verify);
 }

@@ -47,6 +47,8 @@ func main() {
 		n, _ = strconv.Atoi(flag.Arg(0))
 	}
 
+	verify := flag.NArg() > 1 && flag.Arg(1) == "v"
+
 	u := make(Vec, n)
 	v := make(Vec, n)
 	for i := range u {
@@ -62,5 +64,8 @@ func main() {
 		vBv += u[i] * vi
 		vv += vi * vi
 	}
-	fmt.Printf("%0.9f\n", math.Sqrt(vBv/vv))
+	answer := math.Sqrt(vBv / vv)
+    if verify {
+        fmt.Printf("%0.9f\n", answer)
+    }
 }

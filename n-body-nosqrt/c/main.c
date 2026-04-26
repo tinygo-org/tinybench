@@ -9,6 +9,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define pi 3.141592653589793
 #define solar_mass (4 * pi * pi)
@@ -146,15 +147,23 @@ struct planet bodies[NBODIES] = {
 }
 };
 
-int main(int argc, char ** argv)
+int main(int argc, char **argv)
 {
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s <number_of_steps>\n", argv[0]);
+        return 1;
+    }
     int n = atoi(argv[1]);
-    int i;
+    int verify = argc > 2 && strcmp(argv[2], "v") == 0;
 
     offset_momentum(NBODIES, bodies);
-    printf ("%.9f\n", energy(NBODIES, bodies));
-    for (i = 1; i <= n; i++)
+    double start_energy = energy(NBODIES, bodies);
+    if (verify)
+        printf("%.9f\n", start_energy);
+    for (int i = 1; i <= n; i++)
         advance(NBODIES, bodies, 0.01);
-    printf ("%.9f\n", energy(NBODIES, bodies));
+    double end_energy = energy(NBODIES, bodies);
+    if (verify)
+        printf("%.9f\n", end_energy);
     return 0;
 }

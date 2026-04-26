@@ -178,7 +178,7 @@ fn main() {
     let mut args = env::args();
     let prog_name = args.next();
     let steps = args.next();
-
+    let verify = args.next().as_deref() == Some("v");
     let n_steps: usize = match steps {
         None => {
             let name = prog_name.as_deref().unwrap_or("nbody_rust_nosqrt");
@@ -195,10 +195,15 @@ fn main() {
     };
     let mut bodies_arr = initial_bodies();
     offset_momentum(&mut bodies_arr);
-    println!("{:.9}", energy(&bodies_arr));
-
+    let starting_energy = energy(&bodies_arr);
+    if verify {
+        println!("{:.9}", starting_energy);
+    }
     for _ in 0..n_steps {
         advance(&mut bodies_arr, 0.01);
     }
-    println!("{:.9}", energy(&bodies_arr));
+    let ending_energy = energy(&bodies_arr);
+    if verify {
+        println!("{:.9}", ending_energy);
+    }
 }
