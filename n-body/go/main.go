@@ -8,15 +8,15 @@ import (
 )
 
 const (
-	pi		  = 3.141592653589793
+	pi          = 3.141592653589793
 	solarMass   = 4 * pi * pi
 	daysPerYear = 365.24
 )
 
 type Planet struct {
-	x, y, z	float64
+	x, y, z    float64
 	vx, vy, vz float64
-	mass	   float64
+	mass       float64
 }
 
 func advance(nbodies int, bodies []Planet, dt float64) {

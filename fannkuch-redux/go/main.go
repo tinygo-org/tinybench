@@ -7,10 +7,10 @@ import (
 )
 
 type pfannkuch struct {
-	s, t	 [16]elem
+	s, t     [16]elem
 	maxflips int
-	max_n	int
-	odd	  int
+	max_n    int
+	odd      int
 	checksum int
 }
 

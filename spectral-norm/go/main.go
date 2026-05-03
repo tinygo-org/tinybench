@@ -65,7 +65,7 @@ func main() {
 		vv += vi * vi
 	}
 	answer := math.Sqrt(vBv / vv)
-    if verify {
-        fmt.Printf("%0.9f\n", answer)
-    }
+	if verify {
+		fmt.Printf("%0.9f\n", answer)
+	}
 }
