@@ -55,7 +55,7 @@ func drawBenchmark(langs []langBench, savefile, baseCompiler string) error {
 	var (
 		maxBenchs  = nBenchs * len(langs)
 		plotHeight = 10 * vg.Inch
-		plotWidth  = plotHeight * vg.Length(maxBenchs) / 20
+		plotWidth  = plotHeight*vg.Length(maxBenchs)/20 + 1*vg.Centimeter
 		benchWidth = plotWidth / vg.Length(nBenchs)
 
 		fontsize = plotHeight / 25

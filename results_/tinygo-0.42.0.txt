@@ -10,203 +10,167 @@ BenchmarkAll
     bench_test.go:107: found compiler gcc 15.2.1
     bench_test.go:107: found compiler clang 20.1.1
     bench_test.go:109: looking for benchmarks in [fannkuch-redux fasta n-body n-body-nosqrt spectral-norm]
-BenchmarkAll/fannkuch-redux:args=6/zig/zig
-    bench_test.go:145: name="fannkuch-redux" compiler="zig" binarysize=2346112 version=0.15.2
-BenchmarkAll/fannkuch-redux:args=6/zig/zig-12         	    4774	    590780 ns/op
-BenchmarkAll/fannkuch-redux:args=7/zig/zig
-BenchmarkAll/fannkuch-redux:args=7/zig/zig-12         	    1087	   1585411 ns/op
 BenchmarkAll/fannkuch-redux:args=9/zig/zig
-BenchmarkAll/fannkuch-redux:args=9/zig/zig-12         	      88	  13252342 ns/op
-BenchmarkAll/fannkuch-redux:args=6/rust/rustc
-    bench_test.go:145: name="fannkuch-redux" compiler="rustc" binarysize=4347344 version=1.95.0
-BenchmarkAll/fannkuch-redux:args=6/rust/rustc-12      	    1255	   1572642 ns/op
-BenchmarkAll/fannkuch-redux:args=7/rust/rustc
-BenchmarkAll/fannkuch-redux:args=7/rust/rustc-12      	     782	   2436063 ns/op
+    bench_test.go:145: name="fannkuch-redux" compiler="zig" binarysize=2346112 version=0.15.2
+BenchmarkAll/fannkuch-redux:args=9/zig/zig-12         	      84	  13338193 ns/op
+BenchmarkAll/fannkuch-redux:args=10/zig/zig
+BenchmarkAll/fannkuch-redux:args=10/zig/zig-12        	       8	 138295479 ns/op
 BenchmarkAll/fannkuch-redux:args=9/rust/rustc
-BenchmarkAll/fannkuch-redux:args=9/rust/rustc-12      	      75	  15891770 ns/op
-BenchmarkAll/fannkuch-redux:args=6/go/go
-    bench_test.go:145: name="fannkuch-redux" compiler="go" binarysize=2344532 version=1.25.7
-BenchmarkAll/fannkuch-redux:args=6/go/go-12           	     760	   1780535 ns/op
-BenchmarkAll/fannkuch-redux:args=7/go/go
-BenchmarkAll/fannkuch-redux:args=7/go/go-12           	    1056	   3112877 ns/op
+    bench_test.go:145: name="fannkuch-redux" compiler="rustc" binarysize=4347344 version=1.95.0
+BenchmarkAll/fannkuch-redux:args=9/rust/rustc-12      	      76	  15641016 ns/op
+BenchmarkAll/fannkuch-redux:args=10/rust/rustc
+BenchmarkAll/fannkuch-redux:args=10/rust/rustc-12     	       7	 165121882 ns/op
 BenchmarkAll/fannkuch-redux:args=9/go/go
-BenchmarkAll/fannkuch-redux:args=9/go/go-12           	      72	  16583940 ns/op
-BenchmarkAll/fannkuch-redux:args=6/go/tinygo
-    bench_test.go:145: name="fannkuch-redux" compiler="tinygo" binarysize=1541496 version=0.42.0
-BenchmarkAll/fannkuch-redux:args=6/go/tinygo-12       	    6894	    375547 ns/op
-BenchmarkAll/fannkuch-redux:args=7/go/tinygo
-BenchmarkAll/fannkuch-redux:args=7/go/tinygo-12       	    3451	    534124 ns/op
+    bench_test.go:145: name="fannkuch-redux" compiler="go" binarysize=2344532 version=1.25.7
+BenchmarkAll/fannkuch-redux:args=9/go/go-12           	      69	  16479844 ns/op
+BenchmarkAll/fannkuch-redux:args=10/go/go
+BenchmarkAll/fannkuch-redux:args=10/go/go-12          	       7	 162629276 ns/op
 BenchmarkAll/fannkuch-redux:args=9/go/tinygo
-BenchmarkAll/fannkuch-redux:args=9/go/tinygo-12       	      85	  13808939 ns/op
-BenchmarkAll/fannkuch-redux:args=6/c/gcc
-    bench_test.go:145: name="fannkuch-redux" compiler="gcc" binarysize=16328 version=15.2.1
-BenchmarkAll/fannkuch-redux:args=6/c/gcc-12           	    3369	   1173807 ns/op
-BenchmarkAll/fannkuch-redux:args=7/c/gcc
-BenchmarkAll/fannkuch-redux:args=7/c/gcc-12           	     846	   1832509 ns/op
+    bench_test.go:145: name="fannkuch-redux" compiler="tinygo" binarysize=1541496 version=0.42.0
+BenchmarkAll/fannkuch-redux:args=9/go/tinygo-12       	      86	  13419369 ns/op
+BenchmarkAll/fannkuch-redux:args=10/go/tinygo
+BenchmarkAll/fannkuch-redux:args=10/go/tinygo-12      	       8	 141694903 ns/op
 BenchmarkAll/fannkuch-redux:args=9/c/gcc
-BenchmarkAll/fannkuch-redux:args=9/c/gcc-12           	      74	  15945937 ns/op
-BenchmarkAll/fannkuch-redux:args=6/c/clang
-    bench_test.go:145: name="fannkuch-redux" compiler="clang" binarysize=16280 version=20.1.1
-BenchmarkAll/fannkuch-redux:args=6/c/clang-12         	    3853	   1548324 ns/op
-BenchmarkAll/fannkuch-redux:args=7/c/clang
-BenchmarkAll/fannkuch-redux:args=7/c/clang-12         	    1302	   1211856 ns/op
+    bench_test.go:145: name="fannkuch-redux" compiler="gcc" binarysize=16328 version=15.2.1
+BenchmarkAll/fannkuch-redux:args=9/c/gcc-12           	      70	  15476821 ns/op
+BenchmarkAll/fannkuch-redux:args=10/c/gcc
+BenchmarkAll/fannkuch-redux:args=10/c/gcc-12          	       7	 160211098 ns/op
 BenchmarkAll/fannkuch-redux:args=9/c/clang
-BenchmarkAll/fannkuch-redux:args=9/c/clang-12         	      70	  16285880 ns/op
-BenchmarkAll/fasta:args=12500000/zig/zig
+    bench_test.go:145: name="fannkuch-redux" compiler="clang" binarysize=16280 version=20.1.1
+BenchmarkAll/fannkuch-redux:args=9/c/clang-12         	      69	  15687532 ns/op
+BenchmarkAll/fannkuch-redux:args=10/c/clang
+BenchmarkAll/fannkuch-redux:args=10/c/clang-12        	       7	 160899619 ns/op
+BenchmarkAll/fasta:args=1000000/zig/zig
     bench_test.go:145: name="fasta" compiler="zig" binarysize=2348224 version=0.15.2
-BenchmarkAll/fasta:args=12500000/zig/zig-12           	       1	1446318835 ns/op
-BenchmarkAll/fasta:args=25000000/zig/zig
-BenchmarkAll/fasta:args=25000000/zig/zig-12           	       1	2821562816 ns/op
-BenchmarkAll/fasta:args=12500000/rust/rustc
+BenchmarkAll/fasta:args=1000000/zig/zig-12            	      10	 115100689 ns/op
+BenchmarkAll/fasta:args=8000000/zig/zig
+BenchmarkAll/fasta:args=8000000/zig/zig-12            	       2	 949552186 ns/op
+BenchmarkAll/fasta:args=1000000/rust/rustc
     bench_test.go:145: name="fasta" compiler="rustc" binarysize=4348144 version=1.95.0
-BenchmarkAll/fasta:args=12500000/rust/rustc-12        	       1	1353786756 ns/op
-BenchmarkAll/fasta:args=25000000/rust/rustc
-BenchmarkAll/fasta:args=25000000/rust/rustc-12        	       1	2692503049 ns/op
-BenchmarkAll/fasta:args=12500000/go/go
+BenchmarkAll/fasta:args=1000000/rust/rustc-12         	      10	 110101344 ns/op
+BenchmarkAll/fasta:args=8000000/rust/rustc
+BenchmarkAll/fasta:args=8000000/rust/rustc-12         	       2	 816579526 ns/op
+BenchmarkAll/fasta:args=1000000/go/go
     bench_test.go:145: name="fasta" compiler="go" binarysize=2457030 version=1.25.7
-BenchmarkAll/fasta:args=12500000/go/go-12             	       1	1394477740 ns/op
-BenchmarkAll/fasta:args=25000000/go/go
-BenchmarkAll/fasta:args=25000000/go/go-12             	       1	2733055486 ns/op
-BenchmarkAll/fasta:args=12500000/go/tinygo
-    bench_test.go:145: name="fasta" compiler="tinygo" binarysize=1690768 version=0.42.0
-BenchmarkAll/fasta:args=12500000/go/tinygo-12         	       1	1235375002 ns/op
-BenchmarkAll/fasta:args=25000000/go/tinygo
-BenchmarkAll/fasta:args=25000000/go/tinygo-12         	       1	2463493029 ns/op
-BenchmarkAll/fasta:args=12500000/c/gcc
+BenchmarkAll/fasta:args=1000000/go/go-12              	      10	 107901207 ns/op
+BenchmarkAll/fasta:args=8000000/go/go
+BenchmarkAll/fasta:args=8000000/go/go-12              	       2	 842708221 ns/op
+BenchmarkAll/fasta:args=1000000/go/tinygo
+    bench_test.go:145: name="fasta" compiler="tinygo" binarysize=1679592 version=0.42.0
+BenchmarkAll/fasta:args=1000000/go/tinygo-12          	      10	 100115916 ns/op
+BenchmarkAll/fasta:args=8000000/go/tinygo
+BenchmarkAll/fasta:args=8000000/go/tinygo-12          	       2	 780127678 ns/op
+BenchmarkAll/fasta:args=1000000/c/gcc
     bench_test.go:145: name="fasta" compiler="gcc" binarysize=16280 version=15.2.1
-BenchmarkAll/fasta:args=12500000/c/gcc-12             	       1	1202645110 ns/op
-BenchmarkAll/fasta:args=25000000/c/gcc
-BenchmarkAll/fasta:args=25000000/c/gcc-12             	       1	2464626042 ns/op
-BenchmarkAll/fasta:args=12500000/c/clang
+BenchmarkAll/fasta:args=1000000/c/gcc-12              	      12	  96286704 ns/op
+BenchmarkAll/fasta:args=8000000/c/gcc
+BenchmarkAll/fasta:args=8000000/c/gcc-12              	       2	 804399738 ns/op
+BenchmarkAll/fasta:args=1000000/c/clang
     bench_test.go:145: name="fasta" compiler="clang" binarysize=16200 version=20.1.1
-BenchmarkAll/fasta:args=12500000/c/clang-12           	       1	1141674846 ns/op
-BenchmarkAll/fasta:args=25000000/c/clang
-BenchmarkAll/fasta:args=25000000/c/clang-12           	       1	2280829630 ns/op
-BenchmarkAll/n-body:args=50000/zig/zig
-    bench_test.go:145: name="n-body" compiler="zig" binarysize=2389576 version=0.15.2
-BenchmarkAll/n-body:args=50000/zig/zig-12             	     516	   3621238 ns/op
-BenchmarkAll/n-body:args=100000/zig/zig
-BenchmarkAll/n-body:args=100000/zig/zig-12            	     338	   3911141 ns/op
+BenchmarkAll/fasta:args=1000000/c/clang-12            	      12	  99917398 ns/op
+BenchmarkAll/fasta:args=8000000/c/clang
+BenchmarkAll/fasta:args=8000000/c/clang-12            	       2	 728786948 ns/op
 BenchmarkAll/n-body:args=200000/zig/zig
-BenchmarkAll/n-body:args=200000/zig/zig-12            	     169	   6845816 ns/op
-BenchmarkAll/n-body:args=50000/rust/rustc
-    bench_test.go:145: name="n-body" compiler="rustc" binarysize=4373424 version=1.95.0
-BenchmarkAll/n-body:args=50000/rust/rustc-12          	     393	   3054870 ns/op
-BenchmarkAll/n-body:args=100000/rust/rustc
-BenchmarkAll/n-body:args=100000/rust/rustc-12         	     235	   5499999 ns/op
+    bench_test.go:145: name="n-body" compiler="zig" binarysize=2389576 version=0.15.2
+BenchmarkAll/n-body:args=200000/zig/zig-12            	     172	   7789949 ns/op
+BenchmarkAll/n-body:args=300000/zig/zig
+BenchmarkAll/n-body:args=300000/zig/zig-12            	     120	  10300733 ns/op
 BenchmarkAll/n-body:args=200000/rust/rustc
-BenchmarkAll/n-body:args=200000/rust/rustc-12         	     100	  10162707 ns/op
-BenchmarkAll/n-body:args=50000/go/go
-    bench_test.go:145: name="n-body" compiler="go" binarysize=2344462 version=1.25.7
-BenchmarkAll/n-body:args=50000/go/go-12               	     158	   7415191 ns/op
-BenchmarkAll/n-body:args=100000/go/go
-BenchmarkAll/n-body:args=100000/go/go-12              	     100	  10134124 ns/op
+    bench_test.go:145: name="n-body" compiler="rustc" binarysize=4373424 version=1.95.0
+BenchmarkAll/n-body:args=200000/rust/rustc-12         	     120	   9743532 ns/op
+BenchmarkAll/n-body:args=300000/rust/rustc
+BenchmarkAll/n-body:args=300000/rust/rustc-12         	      86	  13575028 ns/op
 BenchmarkAll/n-body:args=200000/go/go
-BenchmarkAll/n-body:args=200000/go/go-12              	      82	  14460137 ns/op
-BenchmarkAll/n-body:args=50000/go/tinygo
-    bench_test.go:145: name="n-body" compiler="tinygo" binarysize=1554032 version=0.42.0
-BenchmarkAll/n-body:args=50000/go/tinygo-12           	     387	   2815568 ns/op
-BenchmarkAll/n-body:args=100000/go/tinygo
-BenchmarkAll/n-body:args=100000/go/tinygo-12          	     230	   5598487 ns/op
+    bench_test.go:145: name="n-body" compiler="go" binarysize=2344462 version=1.25.7
+BenchmarkAll/n-body:args=200000/go/go-12              	      81	  14521758 ns/op
+BenchmarkAll/n-body:args=300000/go/go
+BenchmarkAll/n-body:args=300000/go/go-12              	      57	  20612938 ns/op
 BenchmarkAll/n-body:args=200000/go/tinygo
-BenchmarkAll/n-body:args=200000/go/tinygo-12          	     100	  10302133 ns/op
-BenchmarkAll/n-body:args=50000/c/gcc
-    bench_test.go:145: name="n-body" compiler="gcc" binarysize=16400 version=15.2.1
-BenchmarkAll/n-body:args=50000/c/gcc-12               	     517	   3318892 ns/op
-BenchmarkAll/n-body:args=100000/c/gcc
-BenchmarkAll/n-body:args=100000/c/gcc-12              	     240	   5085405 ns/op
+    bench_test.go:145: name="n-body" compiler="tinygo" binarysize=1554032 version=0.42.0
+BenchmarkAll/n-body:args=200000/go/tinygo-12          	     120	  10082239 ns/op
+BenchmarkAll/n-body:args=300000/go/tinygo
+BenchmarkAll/n-body:args=300000/go/tinygo-12          	      84	  14288535 ns/op
 BenchmarkAll/n-body:args=200000/c/gcc
-BenchmarkAll/n-body:args=200000/c/gcc-12              	     134	   8553579 ns/op
-BenchmarkAll/n-body:args=50000/c/clang
-    bench_test.go:145: name="n-body" compiler="clang" binarysize=16384 version=20.1.1
-BenchmarkAll/n-body:args=50000/c/clang-12             	     507	   3213731 ns/op
-BenchmarkAll/n-body:args=100000/c/clang
-BenchmarkAll/n-body:args=100000/c/clang-12            	     266	   4792165 ns/op
+    bench_test.go:145: name="n-body" compiler="gcc" binarysize=16400 version=15.2.1
+BenchmarkAll/n-body:args=200000/c/gcc-12              	     136	   8271588 ns/op
+BenchmarkAll/n-body:args=300000/c/gcc
+BenchmarkAll/n-body:args=300000/c/gcc-12              	      98	  11860719 ns/op
 BenchmarkAll/n-body:args=200000/c/clang
-BenchmarkAll/n-body:args=200000/c/clang-12            	     140	   8384447 ns/op
-BenchmarkAll/n-body-nosqrt:args=50000/zig/zig
-    bench_test.go:145: name="n-body-nosqrt" compiler="zig" binarysize=2394784 version=0.15.2
-BenchmarkAll/n-body-nosqrt:args=50000/zig/zig-12      	      94	  11382729 ns/op
-BenchmarkAll/n-body-nosqrt:args=100000/zig/zig
-BenchmarkAll/n-body-nosqrt:args=100000/zig/zig-12     	      50	  22488060 ns/op
+    bench_test.go:145: name="n-body" compiler="clang" binarysize=16384 version=20.1.1
+BenchmarkAll/n-body:args=200000/c/clang-12            	     136	   8943665 ns/op
+BenchmarkAll/n-body:args=300000/c/clang
+BenchmarkAll/n-body:args=300000/c/clang-12            	      87	  12151455 ns/op
 BenchmarkAll/n-body-nosqrt:args=200000/zig/zig
-BenchmarkAll/n-body-nosqrt:args=200000/zig/zig-12     	      25	  43920800 ns/op
-BenchmarkAll/n-body-nosqrt:args=50000/rust/rustc
-    bench_test.go:145: name="n-body-nosqrt" compiler="rustc" binarysize=4373760 version=1.95.0
-BenchmarkAll/n-body-nosqrt:args=50000/rust/rustc-12   	      90	  13272459 ns/op
-BenchmarkAll/n-body-nosqrt:args=100000/rust/rustc
-BenchmarkAll/n-body-nosqrt:args=100000/rust/rustc-12  	      43	  25987283 ns/op
+    bench_test.go:145: name="n-body-nosqrt" compiler="zig" binarysize=2394784 version=0.15.2
+BenchmarkAll/n-body-nosqrt:args=200000/zig/zig-12     	      25	  45025962 ns/op
+BenchmarkAll/n-body-nosqrt:args=300000/zig/zig
+BenchmarkAll/n-body-nosqrt:args=300000/zig/zig-12     	      16	  64477314 ns/op
 BenchmarkAll/n-body-nosqrt:args=200000/rust/rustc
-BenchmarkAll/n-body-nosqrt:args=200000/rust/rustc-12  	      21	  52037032 ns/op
-BenchmarkAll/n-body-nosqrt:args=50000/go/go
-    bench_test.go:145: name="n-body-nosqrt" compiler="go" binarysize=2344394 version=1.25.7
-BenchmarkAll/n-body-nosqrt:args=50000/go/go-12        	      76	  15472946 ns/op
-BenchmarkAll/n-body-nosqrt:args=100000/go/go
-BenchmarkAll/n-body-nosqrt:args=100000/go/go-12       	      39	  29266020 ns/op
+    bench_test.go:145: name="n-body-nosqrt" compiler="rustc" binarysize=4373760 version=1.95.0
+BenchmarkAll/n-body-nosqrt:args=200000/rust/rustc-12  	      24	  49967861 ns/op
+BenchmarkAll/n-body-nosqrt:args=300000/rust/rustc
+BenchmarkAll/n-body-nosqrt:args=300000/rust/rustc-12  	      15	  73972680 ns/op
 BenchmarkAll/n-body-nosqrt:args=200000/go/go
-BenchmarkAll/n-body-nosqrt:args=200000/go/go-12       	      20	  56591633 ns/op
-BenchmarkAll/n-body-nosqrt:args=50000/go/tinygo
-    bench_test.go:145: name="n-body-nosqrt" compiler="tinygo" binarysize=1555056 version=0.42.0
-BenchmarkAll/n-body-nosqrt:args=50000/go/tinygo-12    	      93	  12477982 ns/op
-BenchmarkAll/n-body-nosqrt:args=100000/go/tinygo
-BenchmarkAll/n-body-nosqrt:args=100000/go/tinygo-12   	      48	  24106628 ns/op
+    bench_test.go:145: name="n-body-nosqrt" compiler="go" binarysize=2344394 version=1.25.7
+BenchmarkAll/n-body-nosqrt:args=200000/go/go-12       	      19	  56375283 ns/op
+BenchmarkAll/n-body-nosqrt:args=300000/go/go
+BenchmarkAll/n-body-nosqrt:args=300000/go/go-12       	      13	  84115020 ns/op
 BenchmarkAll/n-body-nosqrt:args=200000/go/tinygo
-BenchmarkAll/n-body-nosqrt:args=200000/go/tinygo-12   	      24	  47180660 ns/op
-BenchmarkAll/n-body-nosqrt:args=50000/c/gcc
-    bench_test.go:145: name="n-body-nosqrt" compiler="gcc" binarysize=16480 version=15.2.1
-BenchmarkAll/n-body-nosqrt:args=50000/c/gcc-12        	      82	  13027124 ns/op
-BenchmarkAll/n-body-nosqrt:args=100000/c/gcc
-BenchmarkAll/n-body-nosqrt:args=100000/c/gcc-12       	      45	  25488042 ns/op
+    bench_test.go:145: name="n-body-nosqrt" compiler="tinygo" binarysize=1555056 version=0.42.0
+BenchmarkAll/n-body-nosqrt:args=200000/go/tinygo-12   	      24	  47262108 ns/op
+BenchmarkAll/n-body-nosqrt:args=300000/go/tinygo
+BenchmarkAll/n-body-nosqrt:args=300000/go/tinygo-12   	      15	  69850927 ns/op
 BenchmarkAll/n-body-nosqrt:args=200000/c/gcc
-BenchmarkAll/n-body-nosqrt:args=200000/c/gcc-12       	      22	  49067597 ns/op
-BenchmarkAll/n-body-nosqrt:args=50000/c/clang
-    bench_test.go:145: name="n-body-nosqrt" compiler="clang" binarysize=16472 version=20.1.1
-BenchmarkAll/n-body-nosqrt:args=50000/c/clang-12      	      97	  12088995 ns/op
-BenchmarkAll/n-body-nosqrt:args=100000/c/clang
-BenchmarkAll/n-body-nosqrt:args=100000/c/clang-12     	      48	  23038413 ns/op
+    bench_test.go:145: name="n-body-nosqrt" compiler="gcc" binarysize=16480 version=15.2.1
+BenchmarkAll/n-body-nosqrt:args=200000/c/gcc-12       	      21	  48628458 ns/op
+BenchmarkAll/n-body-nosqrt:args=300000/c/gcc
+BenchmarkAll/n-body-nosqrt:args=300000/c/gcc-12       	      15	  72387650 ns/op
 BenchmarkAll/n-body-nosqrt:args=200000/c/clang
-BenchmarkAll/n-body-nosqrt:args=200000/c/clang-12     	      25	  45250872 ns/op
+    bench_test.go:145: name="n-body-nosqrt" compiler="clang" binarysize=16472 version=20.1.1
+BenchmarkAll/n-body-nosqrt:args=200000/c/clang-12     	      24	  45343357 ns/op
+BenchmarkAll/n-body-nosqrt:args=300000/c/clang
+BenchmarkAll/n-body-nosqrt:args=300000/c/clang-12     	      16	  66182942 ns/op
 BenchmarkAll/spectral-norm:args=1000/zig/zig
     bench_test.go:145: name="spectral-norm" compiler="zig" binarysize=2395664 version=0.15.2
-BenchmarkAll/spectral-norm:args=1000/zig/zig-12       	      24	  45109406 ns/op
+BenchmarkAll/spectral-norm:args=1000/zig/zig-12       	      26	  45412660 ns/op
 BenchmarkAll/spectral-norm:args=2500/zig/zig
-BenchmarkAll/spectral-norm:args=2500/zig/zig-12       	       4	 278085948 ns/op
+BenchmarkAll/spectral-norm:args=2500/zig/zig-12       	       4	 269827153 ns/op
 BenchmarkAll/spectral-norm:args=5500/zig/zig
-BenchmarkAll/spectral-norm:args=5500/zig/zig-12       	       1	1342763714 ns/op
+BenchmarkAll/spectral-norm:args=5500/zig/zig-12       	       1	1294434348 ns/op
 BenchmarkAll/spectral-norm:args=1000/rust/rustc
     bench_test.go:145: name="spectral-norm" compiler="rustc" binarysize=4369232 version=1.95.0
-BenchmarkAll/spectral-norm:args=1000/rust/rustc-12    	      28	  40707767 ns/op
+BenchmarkAll/spectral-norm:args=1000/rust/rustc-12    	      26	  40112268 ns/op
 BenchmarkAll/spectral-norm:args=2500/rust/rustc
-BenchmarkAll/spectral-norm:args=2500/rust/rustc-12    	       5	 243849044 ns/op
+BenchmarkAll/spectral-norm:args=2500/rust/rustc-12    	       5	 237616028 ns/op
 BenchmarkAll/spectral-norm:args=5500/rust/rustc
-BenchmarkAll/spectral-norm:args=5500/rust/rustc-12    	       1	1114821895 ns/op
+BenchmarkAll/spectral-norm:args=5500/rust/rustc-12    	       1	1146370868 ns/op
 BenchmarkAll/spectral-norm:args=1000/go/go
     bench_test.go:145: name="spectral-norm" compiler="go" binarysize=2445722 version=1.25.7
-BenchmarkAll/spectral-norm:args=1000/go/go-12         	      27	  41027560 ns/op
+BenchmarkAll/spectral-norm:args=1000/go/go-12         	      28	  40958338 ns/op
 BenchmarkAll/spectral-norm:args=2500/go/go
-BenchmarkAll/spectral-norm:args=2500/go/go-12         	       5	 246574589 ns/op
+BenchmarkAll/spectral-norm:args=2500/go/go-12         	       4	 254545702 ns/op
 BenchmarkAll/spectral-norm:args=5500/go/go
-BenchmarkAll/spectral-norm:args=5500/go/go-12         	       1	1144282947 ns/op
+BenchmarkAll/spectral-norm:args=5500/go/go-12         	       1	1133576823 ns/op
 BenchmarkAll/spectral-norm:args=1000/go/tinygo
     bench_test.go:145: name="spectral-norm" compiler="tinygo" binarysize=1656672 version=0.42.0
-BenchmarkAll/spectral-norm:args=1000/go/tinygo-12     	      28	  39083294 ns/op
+BenchmarkAll/spectral-norm:args=1000/go/tinygo-12     	      28	  39752987 ns/op
 BenchmarkAll/spectral-norm:args=2500/go/tinygo
-BenchmarkAll/spectral-norm:args=2500/go/tinygo-12     	       5	 246232067 ns/op
+BenchmarkAll/spectral-norm:args=2500/go/tinygo-12     	       5	 235496935 ns/op
 BenchmarkAll/spectral-norm:args=5500/go/tinygo
-BenchmarkAll/spectral-norm:args=5500/go/tinygo-12     	       1	1134062139 ns/op
+BenchmarkAll/spectral-norm:args=5500/go/tinygo-12     	       1	1128457952 ns/op
 BenchmarkAll/spectral-norm:args=1000/c/gcc
     bench_test.go:145: name="spectral-norm" compiler="gcc" binarysize=16168 version=15.2.1
-BenchmarkAll/spectral-norm:args=1000/c/gcc-12         	      38	  28593950 ns/op
+BenchmarkAll/spectral-norm:args=1000/c/gcc-12         	      38	  28843310 ns/op
 BenchmarkAll/spectral-norm:args=2500/c/gcc
-BenchmarkAll/spectral-norm:args=2500/c/gcc-12         	       6	 185013446 ns/op
+BenchmarkAll/spectral-norm:args=2500/c/gcc-12         	       6	 170103765 ns/op
 BenchmarkAll/spectral-norm:args=5500/c/gcc
-BenchmarkAll/spectral-norm:args=5500/c/gcc-12         	       2	 848523034 ns/op
+BenchmarkAll/spectral-norm:args=5500/c/gcc-12         	       2	 827869374 ns/op
 BenchmarkAll/spectral-norm:args=1000/c/clang
     bench_test.go:145: name="spectral-norm" compiler="clang" binarysize=16144 version=20.1.1
-BenchmarkAll/spectral-norm:args=1000/c/clang-12       	      28	  40277599 ns/op
+BenchmarkAll/spectral-norm:args=1000/c/clang-12       	      28	  39267236 ns/op
 BenchmarkAll/spectral-norm:args=2500/c/clang
-BenchmarkAll/spectral-norm:args=2500/c/clang-12       	       5	 233973160 ns/op
+BenchmarkAll/spectral-norm:args=2500/c/clang-12       	       5	 255589071 ns/op
 BenchmarkAll/spectral-norm:args=5500/c/clang
-BenchmarkAll/spectral-norm:args=5500/c/clang-12       	       1	1182024115 ns/op
+BenchmarkAll/spectral-norm:args=5500/c/clang-12       	       1	1226402364 ns/op
 PASS
-ok  	tinybench	195.897s
+ok  	tinybench	146.996s
