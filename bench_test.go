@@ -110,10 +110,10 @@ func BenchmarkAll(b *testing.B) {
 	for _, testname := range benchnames {
 		argdata, err := os.ReadFile(testname + "/args.txt")
 		casesJoined := strings.TrimSpace(string(argdata))
-		if len(argdata) == 0 {
-			b.Fatalf("%s has empty 'args.txt' file", testname)
-		} else if err != nil {
-			b.Fatalf("%s failed open arguments file 'args.txt': %s", testname, err)
+		if err != nil {
+			b.Fatalf("benchmark %q: failed open arguments file 'args.txt': %s", testname, err)
+		} else if len(argdata) == 0 {
+			b.Fatalf("benchmark %q: has empty 'args.txt' file", testname)
 		}
 
 		cases := strings.Split(casesJoined, "\n")
