@@ -45,15 +45,17 @@ func AccumulateProbabilities(genelist []AminoAcid) {
 // It stops after generating count characters.
 // After each WIDTH characters it prints a newline.
 // It assumes that WIDTH <= len(s) + 1.
-func RepeatFasta(s []byte, count int) {
+func RepeatFasta(s []byte, count int, verify bool) {
 	pos := 0
 	s2 := make([]byte, len(s)+WIDTH)
 	copy(s2, s)
 	copy(s2[len(s):], s)
 	for count > 0 {
 		line := min(WIDTH, count)
-		out.Write(s2[pos : pos+line])
-		out.WriteByte('\n')
+		if verify {
+			out.Write(s2[pos : pos+line])
+			out.WriteByte('\n')
+		}
 		pos += line
 		if pos >= len(s) {
 			pos -= len(s)
@@ -78,7 +80,7 @@ const (
 // RandomFasta then prints the character of the array element.
 // This sequence is repeated count times.
 // Between each WIDTH consecutive characters, the function prints a newline.
-func RandomFasta(genelist []AminoAcid, count int) {
+func RandomFasta(genelist []AminoAcid, count int, verify bool) {
 	buf := make([]byte, WIDTH+1)
 	for count > 0 {
 		line := min(WIDTH, count)
@@ -94,7 +96,9 @@ func RandomFasta(genelist []AminoAcid, count int) {
 			}
 		}
 		buf[line] = '\n'
-		out.Write(buf[0 : line+1])
+		if verify {
+			out.Write(buf[0 : line+1])
+		}
 		count -= line
 	}
 }
@@ -108,29 +112,31 @@ func main() {
 		n, _ = strconv.Atoi(flag.Arg(0))
 	}
 
+	verify := flag.NArg() > 1 && flag.Arg(1) == "v"
+
 	iub := []AminoAcid{
-		AminoAcid{0.27, 'a'},
-		AminoAcid{0.12, 'c'},
-		AminoAcid{0.12, 'g'},
-		AminoAcid{0.27, 't'},
-		AminoAcid{0.02, 'B'},
-		AminoAcid{0.02, 'D'},
-		AminoAcid{0.02, 'H'},
-		AminoAcid{0.02, 'K'},
-		AminoAcid{0.02, 'M'},
-		AminoAcid{0.02, 'N'},
-		AminoAcid{0.02, 'R'},
-		AminoAcid{0.02, 'S'},
-		AminoAcid{0.02, 'V'},
-		AminoAcid{0.02, 'W'},
-		AminoAcid{0.02, 'Y'},
+		{0.27, 'a'},
+		{0.12, 'c'},
+		{0.12, 'g'},
+		{0.27, 't'},
+		{0.02, 'B'},
+		{0.02, 'D'},
+		{0.02, 'H'},
+		{0.02, 'K'},
+		{0.02, 'M'},
+		{0.02, 'N'},
+		{0.02, 'R'},
+		{0.02, 'S'},
+		{0.02, 'V'},
+		{0.02, 'W'},
+		{0.02, 'Y'},
 	}
 
 	homosapiens := []AminoAcid{
-		AminoAcid{0.3029549426680, 'a'},
-		AminoAcid{0.1979883004921, 'c'},
-		AminoAcid{0.1975473066391, 'g'},
-		AminoAcid{0.3015094502008, 't'},
+		{0.3029549426680, 'a'},
+		{0.1979883004921, 'c'},
+		{0.1975473066391, 'g'},
+		{0.3015094502008, 't'},
 	}
 
 	AccumulateProbabilities(iub)
@@ -145,10 +151,16 @@ func main() {
 			"AGGCGGAGGTTGCAGTGAGCCGAGATCGCGCCACTGCACTCC" +
 			"AGCCTGGGCGACAGAGCGAGACTCCGTCTCAAAAA")
 
-	out.WriteString(">ONE Homo sapiens alu\n")
-	RepeatFasta(alu, 2*n)
-	out.WriteString(">TWO IUB ambiguity codes\n")
-	RandomFasta(iub, 3*n)
-	out.WriteString(">THREE Homo sapiens frequency\n")
-	RandomFasta(homosapiens, 5*n)
+	if verify {
+		out.WriteString(">ONE Homo sapiens alu\n")
+	}
+	RepeatFasta(alu, 2*n, verify)
+	if verify {
+		out.WriteString(">TWO IUB ambiguity codes\n")
+	}
+	RandomFasta(iub, 3*n, verify)
+	if verify {
+		out.WriteString(">THREE Homo sapiens frequency\n")
+	}
+	RandomFasta(homosapiens, 5*n, verify)
 }

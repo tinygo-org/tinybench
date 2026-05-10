@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
     if (argc > 1) {
         n = atoi(argv[1]);
     }
+    int verify = argc > 2 && strcmp(argv[2], "v") == 0;
 
     double *u = (double *)malloc(n * sizeof(double));
     double *v = (double *)malloc(n * sizeof(double));
@@ -59,7 +60,10 @@ int main(int argc, char *argv[]) {
         vv += v[i] * v[i];
     }
 
-    printf("%0.9f\n", sqrt(vBv / vv));
+    double answer = sqrt(vBv / vv);
+    if (verify) {
+        printf("%0.9f\n", answer);
+    }
 
     free(u);
     free(v);

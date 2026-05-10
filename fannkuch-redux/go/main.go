@@ -80,15 +80,16 @@ func main() {
 	}
 	var pf pfannkuch
 	pf.max_n, _ = strconv.Atoi(os.Args[1])
+	verify := len(os.Args) > 2 && os.Args[2] == "v"
 	if pf.max_n < 3 || pf.max_n > 15 {
 		fmt.Fprintf(os.Stderr, "max N range: must be 3 <= n <= 12\n")
 		os.Exit(1)
 	}
-
 	for i := 0; i < pf.max_n; i++ {
 		pf.s[i] = elem(i)
 	}
 	pf.tk(pf.max_n)
-
-	fmt.Printf("%d\nPfannkuchen(%d) = %d\n", pf.checksum, pf.max_n, pf.maxflips)
+	if verify {
+		fmt.Printf("%d\nPfannkuchen(%d) = %d\n", pf.checksum, pf.max_n, pf.maxflips)
+	}
 }

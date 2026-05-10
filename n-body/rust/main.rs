@@ -88,10 +88,18 @@ const NBODIES: usize = 5;
 
 fn initial_bodies() -> [Planet; NBODIES] {
     [
-        Planet { // sun
-            x: 0.0, y: 0.0, z: 0.0, vx: 0.0, vy: 0.0, vz: 0.0, mass: SOLAR_MASS,
+        Planet {
+            // sun
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+            vx: 0.0,
+            vy: 0.0,
+            vz: 0.0,
+            mass: SOLAR_MASS,
         },
-        Planet { // jupiter
+        Planet {
+            // jupiter
             x: 4.84143144246472090e+00,
             y: -1.16032004402742839e+00,
             z: -1.03622044471123109e-01,
@@ -100,7 +108,8 @@ fn initial_bodies() -> [Planet; NBODIES] {
             vz: -6.90460016972063023e-05 * DAYS_PER_YEAR,
             mass: 9.54791938424326609e-04 * SOLAR_MASS,
         },
-        Planet { // saturn
+        Planet {
+            // saturn
             x: 8.34336671824457987e+00,
             y: 4.12479856412430479e+00,
             z: -4.03523417114321381e-01,
@@ -109,7 +118,8 @@ fn initial_bodies() -> [Planet; NBODIES] {
             vz: 2.30417297573763929e-05 * DAYS_PER_YEAR,
             mass: 2.85885980666130812e-04 * SOLAR_MASS,
         },
-        Planet { // uranus
+        Planet {
+            // uranus
             x: 1.28943695621391310e+01,
             y: -1.51111514016986312e+01,
             z: -2.23307578892655734e-01,
@@ -118,7 +128,8 @@ fn initial_bodies() -> [Planet; NBODIES] {
             vz: -2.96589568540237556e-05 * DAYS_PER_YEAR,
             mass: 4.36624404335156298e-05 * SOLAR_MASS,
         },
-        Planet { // neptune
+        Planet {
+            // neptune
             x: 1.53796971148509165e+01,
             y: -2.59193146099879641e+01,
             z: 1.79258772950371181e-01,
@@ -131,28 +142,35 @@ fn initial_bodies() -> [Planet; NBODIES] {
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 2 {
-        eprintln!("Usage: {} <number_of_steps>", args.get(0).map_or("nbody_rust", |s| s.as_str()));
-        process::exit(1);
-    }
-
-    let n_steps: usize = match args[1].parse() {
-        Ok(n) => n,
-        Err(_) => {
-            eprintln!("Error: Could not parse number of steps '{}'", args[1]);
+    let mut args = env::args();
+    let prog_name = args.next();
+    let steps = args.next();
+    let verify = args.next().as_deref() == Some("v");
+    let n_steps: usize = match steps {
+        None => {
+            let name = prog_name.as_deref().unwrap_or("nbody_rust");
+            eprintln!("Usage: {name} <number_of_steps>");
             process::exit(1);
         }
+        Some(s) => match s.parse() {
+            Ok(n) => n,
+            Err(_) => {
+                eprintln!("Error: Could not parse number of steps '{s}'");
+                process::exit(1);
+            }
+        },
     };
-
     let mut bodies_arr = initial_bodies();
     offset_momentum(&mut bodies_arr);
-
-    println!("{:.9}", energy(&bodies_arr));
-
+    let starting_energy = energy(&bodies_arr);
+    if verify {
+        println!("{:.9}", starting_energy);
+    }
     for _ in 0..n_steps {
         advance(&mut bodies_arr, 0.01);
     }
-
-    println!("{:.9}", energy(&bodies_arr));
+    let ending_energy = energy(&bodies_arr);
+    if verify {
+        println!("{:.9}", ending_energy);
+    }
 }

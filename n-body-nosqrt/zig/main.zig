@@ -156,13 +156,21 @@ pub fn main(init: std.process.Init) !void {
     const arg = it.next() orelse return error.MissingArgs;
     const n = try std.fmt.parseInt(usize, arg, 10);
     const bodies = Bodies[0..];
+    const verify_arg = it.next();
+    const verify = verify_arg != null and std.mem.eql(u8, verify_arg.?, "v");
 
     offsetMomentum(bodies);
-    stdout.print("{d:.9}\n", .{energy(bodies)});
+    const start_energy = energy(bodies);
+    if (verify) {
+        stdout.print("{d:.9}\n", .{start_energy});
+    }
 
     for (0..n) |_| {
         advance(bodies, 0.01);
     }
 
-    stdout.print("{d:.9}\n", .{energy(bodies)});
+    const end_energy = energy(bodies);
+    if (verify) {
+        stdout.print("{d:.9}\n", .{end_energy});
+    }
 }

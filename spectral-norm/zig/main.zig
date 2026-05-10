@@ -44,6 +44,9 @@ pub fn main(init: std.process.Init) !void {
     const arg = it.next() orelse return error.MissingArgs;
     const n = try std.fmt.parseInt(usize, arg, 10);
 
+    const verify_arg = it.next();
+    const verify = verify_arg != null and std.mem.eql(u8, verify_arg.?, "v");
+
     const u = try allocator.alloc(f64, n);
     const v = try allocator.alloc(f64, n);
     defer allocator.free(u);
@@ -64,5 +67,8 @@ pub fn main(init: std.process.Init) !void {
         vv += vi * vi;
     }
 
-    stdout.print("{d:.9}\n", .{math.sqrt(vBv / vv)});
+    const answer = math.sqrt(vBv / vv);
+    if (verify) {
+        stdout.print("{d:.9}\n", .{answer});
+    }
 }

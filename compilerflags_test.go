@@ -36,6 +36,6 @@ var tinygoBaseFlags = []string{
 }
 
 var rustBaseFlags = []string{
-	"-Copt-level=2",
+	"-Copt-level=3",
 	"-o", "rust.bin",
 }
