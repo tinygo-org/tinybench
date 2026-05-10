@@ -117,6 +117,7 @@ func drawBenchmark(langs []langBench, savefile, baseCompiler string) error {
 	}
 	p_time.Legend.Top = true
 	p_time.NominalX(nominals...)
+	p_time.X.Max *= 1.1                             // Give bars margin so they don't overlap with legend.
 	p_time.X.Tick.Label.Font.Size = benchWidth / 12 // Nominal size.
 
 	p_time.Title.TextStyle.Font.Size = fontsize
