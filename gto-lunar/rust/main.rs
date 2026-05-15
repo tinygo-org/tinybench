@@ -1,3 +1,6 @@
+// Original Author: Juan Pablo Sellanes Goncalves
+// https://eventos.iua.edu.ar/event/1/contributions/51/
+
 use std::env;
 use std::f64::consts::PI;
 use std::process;
