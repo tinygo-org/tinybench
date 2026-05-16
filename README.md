@@ -4,6 +4,7 @@ Benchmarks for comparing TinyGo performance.
 
 ## Benchmarks chosen and focus
 
+- `gto-lunar`: Real-world GTO-to-lunar spacecraft trajectory calculation based on [Juan Pablo Sellanes' work](https://eventos.iua.edu.ar/event/1/contributions/51/).
 - `fannkuch-redux`: Focused on integer operations on short arrays
 - `fasta`: Generate and write random DNA sequences. This benchmark makes some use of dynamic memory allocation, thus putting Go's GC to test as well as Zig's allocator.
 - `n-body`: Floating point operations and usage of math library (sqrt)
@@ -21,6 +22,7 @@ Benchmarks are designed "fairly" and with a focus on runtime performance. In the
 We avoid:
 
 - Explicitly moving code to compile-time when we can't do the same in other languages i.e Zig's comptime and C macros
+- Compile flags which compromise program correctness like gcc/clang's `O3` and Zig's `ReleaseFast`
 
 We allow:
 

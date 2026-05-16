@@ -1,14 +1,17 @@
 package tinybench
 
 var gccLinkFlags = map[string][]string{
-	"n-body":        {"-lm"}, // Math library.
-	"n-body-nosqrt": {"-lm"}, // Math library.
-	"spectral-norm": {"-lm"}, // Math library.
+	// `-lm` links C Math library.
+	"n-body":        {"-lm"},
+	"n-body-nosqrt": {"-lm"},
+	"spectral-norm": {"-lm"},
+	"gto-lunar":     {"-lm"},
 }
 
 var gccBaseFlags = []string{
 	// "-O2"=="-O=ReleaseSafe" Same reasoning as with Zig.
 	// It seems serious projects compile with memory limits and safety on.
+	// Evidence: https://www.reddit.com/r/Gentoo/comments/1afpdzv/any_practical_reason_to_not_use_o3_in_common_flags/
 	"-O2",
 	"-o", "c.bin",
 }
