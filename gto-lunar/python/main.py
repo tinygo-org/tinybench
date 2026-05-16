@@ -1,3 +1,6 @@
+# Author: Juan Pablo Sellanes
+# https://eventos.iua.edu.ar/event/1/contributions/51/
+
 import sys
 import numpy as np
 from scipy.integrate import solve_ivp
@@ -32,7 +35,7 @@ W = np.sqrt(mu / r12**3)            # velocidad angular (rad/s)
 x1 = -pi_2 * r12                    # posición x de la Tierra en el sistema rotante
 x2 = pi_1 * r12                     # posición x de la Luna
 
-L1 = 321710                             # L1 distance (km)
+L1 = 321710                             # distancia L1 (km)
 
 # Parámetros de propulsión y otros
 n = 4
@@ -130,10 +133,14 @@ jacobiC1.direction = 0
 
 def print_state(phase, t, y):
     earthdist = np.hypot(y[0] - x1, y[1])
-    print(f"phase={phase} t={t/days:6.2f}d earthdist={earthdist:.1f}km pos=({y[0]:.3f},{y[1]:.3f})")
+    print(f"fase={phase} t={t/days:6.2f}d earthdist={earthdist:.1f}km pos=({y[0]:.3f},{y[1]:.3f})")
 
 
-def run(max_step, verify=False):
+# -----------------------------
+# Trayectoria principal
+# -----------------------------
+def trayectoria(max_step, verify=False):
+    """Ejecuta la simulación con paso máximo dado."""
     h_apogee = 37000
     h_perigee = 1200
     r_apogee = rearth + h_apogee
@@ -163,7 +170,7 @@ def run(max_step, verify=False):
         max_step=min(450, max_step),
     )
     if sol1.t_events[0].size == 0:
-        raise RuntimeError('phase 1: jacobi threshold not crossed')
+        raise RuntimeError('fase 1: no se cruzó el umbral de Jacobi')
     t1 = sol1.t_events[0][0]
     f1 = sol1.y[:, -1]
     if verify:
@@ -180,7 +187,7 @@ def run(max_step, verify=False):
         max_step=min(200, max_step),
     )
     if sol2.t_events[0].size == 0:
-        raise RuntimeError('during phase 2: L1 distance not reached')
+        raise RuntimeError('durante fase 2: no se alcanzó L1')
     t2 = sol2.t_events[0][0]
     f2 = sol2.y[:, -1]
     if verify:
@@ -197,7 +204,7 @@ def run(max_step, verify=False):
         max_step=min(days, max_step),
     )
     if sol3.t_events[0].size == 0:
-        raise RuntimeError('during phase 3: C1 distance not reached while braking')
+        raise RuntimeError('durante fase 3: no se alcanzó C1 mientras frenaba')
     t3 = sol3.t_events[0][0]
     f3 = sol3.y[:, -1]
     if verify:
@@ -222,19 +229,19 @@ def run(max_step, verify=False):
 
 def main():
     if len(sys.argv) < 2:
-        print('missing arg')
+        print('falta arg')
         sys.exit(1)
 
     try:
         max_step = float(sys.argv[1])
     except ValueError as err:
-        print('bad arg:', err)
+        print('arg inválido:', err)
         sys.exit(1)
 
     verify = len(sys.argv) == 3 and sys.argv[2] == 'v'
 
     try:
-        run(max_step, verify)
+        trayectoria(max_step, verify)
     except Exception as err:
         print(err)
         sys.exit(1)
