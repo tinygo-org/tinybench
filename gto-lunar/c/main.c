@@ -292,6 +292,7 @@ static double Step(Integrator *ig, double h) {
     RatesFunc rates = ig->Rates;
     void     *ctx   = ig->RatesCtx;
 
+    int stepRejected = 0;
     for (;;) {
         double tNext = t + h;
         double hEff  = tNext - t;
@@ -368,6 +369,7 @@ static double Step(Integrator *ig, double h) {
 
             double factorRaw     = safety * pow(errNorm, -1.0/order);
             double factorClamped = fmax(minFac, fmin(maxFac, factorRaw));
+            if (stepRejected) factorClamped = fmin(1.0, factorClamped);
             return fmax(ig->MinStep, fmin(ig->MaxStep, hEff*factorClamped));
         }
 
@@ -375,6 +377,7 @@ static double Step(Integrator *ig, double h) {
         double factor = safety * pow(errNorm, -1.0/order);
         factor = fmax(minFac, factor);
         h = fmax(ig->MinStep, hEff*factor);
+        stepRejected = 1;
 
         if (h <= ig->MinStep) {
             ig->T     = tNext;

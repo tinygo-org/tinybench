@@ -234,6 +234,7 @@ const Integrator = struct {
         const phi_s0 = ig.phi_s0;
 
         var h = h_in;
+        var step_rejected = false;
         while (true) {
             const t_next = t + h;
             const h_eff = t_next - t;
@@ -319,7 +320,8 @@ const Integrator = struct {
                     return @min(h_eff * max_fac, ig.max_step);
                 }
                 const factor_raw = safety * math.pow(f64, err_norm, -1.0 / order);
-                const factor_clamped = @max(min_fac, @min(max_fac, factor_raw));
+                var factor_clamped = @max(min_fac, @min(max_fac, factor_raw));
+                if (step_rejected) factor_clamped = @min(1.0, factor_clamped);
                 return @max(ig.min_step, @min(ig.max_step, h_eff * factor_clamped));
             }
 
@@ -327,6 +329,7 @@ const Integrator = struct {
             var factor = safety * math.pow(f64, err_norm, -1.0 / order);
             factor = @max(min_fac, factor);
             h = @max(ig.min_step, h_eff * factor);
+            step_rejected = true;
 
             if (h <= ig.min_step) {
                 ig.t = t_next;

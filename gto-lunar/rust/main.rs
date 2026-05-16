@@ -324,6 +324,7 @@ impl Integrator {
         let pc = self.pc;
 
         let mut h = h;
+        let mut step_rejected = false;
         loop {
             let t_next = t + h;
             let h_eff = t_next - t;
@@ -406,13 +407,15 @@ impl Integrator {
                     return (h_eff * MAX_FAC).min(max_step);
                 }
                 let factor_raw = SAFETY * err_norm.powf(-1.0 / ORDER);
-                let factor = factor_raw.clamp(MIN_FAC, MAX_FAC);
+                let mut factor = factor_raw.clamp(MIN_FAC, MAX_FAC);
+                if step_rejected { factor = factor.min(1.0); }
                 return (h_eff * factor).clamp(min_step, max_step);
             }
 
             // Step rejected: reduce h.
             let factor = (SAFETY * err_norm.powf(-1.0 / ORDER)).max(MIN_FAC);
             h = (h_eff * factor).max(min_step);
+            step_rejected = true;
 
             if h <= min_step {
                 self.t = t_next;

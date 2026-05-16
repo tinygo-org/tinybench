@@ -447,6 +447,7 @@ func (ig *Integrator) Step(h float64) float64 {
 	phiS0 := ig.PhiS0
 	rates := ig.Rates
 
+	stepRejected := false
 	for {
 		// Mirror scipy's _step_impl inner loop: recompute h as (t+h)-t.
 		// scipy does: t_new = t + h; h = t_new - t; h_abs = |h|
@@ -534,19 +535,23 @@ func (ig *Integrator) Step(h float64) float64 {
 			ig.StepCount++
 
 			if errNorm == 0 {
-				hNext := math.Min(hEff*maxFac, ig.MaxStep)
-				return hNext
+				return math.Min(hEff*maxFac, ig.MaxStep)
 			}
 			factorRaw := safety * math.Pow(errNorm, -1.0/order)
 			factorClamped := math.Max(minFac, math.Min(maxFac, factorRaw))
-			hNext := math.Max(ig.MinStep, math.Min(ig.MaxStep, hEff*factorClamped))
-			return hNext
+			// Mirror scipy: after rejection-then-acceptance, cap factor at 1.0
+			// (scipy: if step_rejected: factor = min(1, factor))
+			if stepRejected {
+				factorClamped = math.Min(1.0, factorClamped)
+			}
+			return math.Max(ig.MinStep, math.Min(ig.MaxStep, hEff*factorClamped))
 		}
 
 		// Step rejected: reduce using hEff (mirrors scipy: h_abs *= factor where h_abs = |hEff|)
 		factor := safety * math.Pow(errNorm, -1.0/order)
 		factor = math.Max(minFac, factor)
 		h = math.Max(ig.MinStep, hEff*factor)
+		stepRejected = true
 
 		if h <= ig.MinStep {
 			ig.T = tNext

@@ -57,8 +57,11 @@ def rates(t, f):
     r1_val = np.linalg.norm([x + pi_2 * r12, y])
     r2_val = np.linalg.norm([x - pi_1 * r12, y])
     v_val = np.linalg.norm([vx, vy])
-    ax = 2 * W * vy + W**2 * x - mu1 * (x - x1) / (r1_val**3) - mu2 * (x - x2) / (r2_val**3) + (T_val / m) * (vx / v_val)
-    ay = -2 * W * vx + W**2 * y - (mu1/(r1_val**3) + mu2/(r2_val**3)) * y + (T_val / m) * (vy / v_val)
+    r1_3 = r1_val * r1_val * r1_val
+    r2_3 = r2_val * r2_val * r2_val
+    tmv = T_val / (m * v_val)
+    ax = 2 * W * vy + W**2 * x - mu1 * (x - x1) / r1_3 - mu2 * (x - x2) / r2_3 + tmv * vx
+    ay = -2 * W * vx + W**2 * y - (mu1/r1_3 + mu2/r2_3) * y + tmv * vy
     g0 = 9.807e-3  # km/s² — matches Go's MassRate() exactly
     Isp = 1650
     mdot = -T_val / (g0 * Isp)
@@ -69,8 +72,10 @@ def rates0(t, f):
     x, y, vx, vy, m = f
     r1_val = np.linalg.norm([x + pi_2 * r12, y])
     r2_val = np.linalg.norm([x - pi_1 * r12, y])
-    ax = 2 * W * vy + W**2 * x - mu1 * (x - x1) / (r1_val**3) - mu2 * (x - x2) / (r2_val**3)
-    ay = -2 * W * vx + W**2 * y - (mu1/(r1_val**3) + mu2/(r2_val**3)) * y
+    r1_3 = r1_val * r1_val * r1_val
+    r2_3 = r2_val * r2_val * r2_val
+    ax = 2 * W * vy + W**2 * x - mu1 * (x - x1) / r1_3 - mu2 * (x - x2) / r2_3
+    ay = -2 * W * vx + W**2 * y - (mu1/r1_3 + mu2/r2_3) * y
     return [vx, vy, ax, ay, 0]
 
 def rates_1(t, f):
@@ -80,8 +85,11 @@ def rates_1(t, f):
     r2_val = np.linalg.norm([x - pi_1 * r12, y])
     v_val = np.linalg.norm([vx, vy])
     T_neg = -F * n  # empuje invertido (frena)
-    ax = 2 * W * vy + W**2 * x - mu1 * (x - x1) / (r1_val**3) - mu2 * (x - x2) / (r2_val**3) + (T_neg / m) * (vx / v_val)
-    ay = -2 * W * vx + W**2 * y - (mu1/(r1_val**3) + mu2/(r2_val**3)) * y + (T_neg / m) * (vy / v_val)
+    r1_3 = r1_val * r1_val * r1_val
+    r2_3 = r2_val * r2_val * r2_val
+    tmv = T_neg / (m * v_val)
+    ax = 2 * W * vy + W**2 * x - mu1 * (x - x1) / r1_3 - mu2 * (x - x2) / r2_3 + tmv * vx
+    ay = -2 * W * vx + W**2 * y - (mu1/r1_3 + mu2/r2_3) * y + tmv * vy
     g0 = 9.807e-3 
     Isp = 1650
     mdot = -abs(T_neg) / (g0 * Isp)
@@ -282,8 +290,9 @@ def trayectoria(max_step, verify=False):
     elapsed = time.time() - start_time
     if verify:
         print_state(4, t4, f4)
-        print(f'transferencia completa: {elapsed:.2f}s')
-        animar_trayectoria_dual([sol1, sol2, sol3, sol4], sol1.t[-1])
+        if sys.argv[2] == 'vv':
+            print(f'transferencia completa: {elapsed:.2f}s')
+            animar_trayectoria_dual([sol1, sol2, sol3, sol4], sol1.t[-1])
 
     return f4
 
@@ -299,7 +308,7 @@ def main():
         print('arg inválido:', err)
         sys.exit(1)
 
-    verify = len(sys.argv) == 3 and sys.argv[2] == 'v'
+    verify = len(sys.argv) == 3 and sys.argv[2] in ['v','vv']
 
     try:
         trayectoria(max_step, verify)
