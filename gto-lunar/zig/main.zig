@@ -1,3 +1,6 @@
+// Original Author: Juan Pablo Sellanes Goncalves
+// https://eventos.iua.edu.ar/event/1/contributions/51/
+
 const std = @import("std");
 const math = std.math;
 const stdout = std.debug;
