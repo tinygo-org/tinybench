@@ -2,7 +2,10 @@
 # https://eventos.iua.edu.ar/event/1/contributions/51/
 
 import sys
+import time
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation, PillowWriter
 from scipy.integrate import solve_ivp
 
 #######################
@@ -136,11 +139,66 @@ def print_state(phase, t, y):
     print(f"fase={phase} t={t/days:6.2f}d earthdist={earthdist:.1f}km pos=({y[0]:.3f},{y[1]:.3f})")
 
 
+def circle(xc, yc, radius, num_points=361):
+    theta = np.deg2rad(np.linspace(0, 360, num_points))
+    x = xc + radius * np.cos(theta)
+    y = yc + radius * np.sin(theta)
+    return x, y
+
+
+def animar_trayectoria_dual(sols, t_threshold, nombre_archivo='trayectoria_dual.gif'):
+    """Genera una animación GIF de la trayectoria acumulada de todas las fases."""
+    tiempos = np.concatenate([sol.t for sol in sols])
+    x_total = np.concatenate([sol.y[0] for sol in sols])
+    y_total = np.concatenate([sol.y[1] for sol in sols])
+
+    step_initial = 2 * days
+    step_secondary = 0.5 * days
+    frame_times_initial = np.arange(tiempos[0], t_threshold + step_initial, step_initial)
+    frame_times_secondary = np.arange(t_threshold + step_secondary, tiempos[-1] + step_secondary, step_secondary)
+    frame_times = np.concatenate((frame_times_initial, frame_times_secondary))
+
+    fig, ax = plt.subplots(figsize=(8, 8))
+    ax.set_xlim(-400000, 450000)
+    ax.set_ylim(-325000, 325000)
+    ax.set_xlabel('x [km]')
+    ax.set_ylabel('y [km]')
+    ax.set_aspect('equal', adjustable='box')
+    ax.grid(True)
+
+    earth_x, earth_y = circle(x1, 0, rearth)
+    moon_x, moon_y = circle(x2, 0, rmoon)
+    ax.fill(earth_x, earth_y, 'b', alpha=0.9, label='Tierra')
+    ax.fill(moon_x, moon_y, 'g', alpha=0.9, label='Luna')
+    ax.legend(fontsize=10)
+
+    traj_line, = ax.plot([], [], 'r-', lw=1.5)
+    current_point, = ax.plot([], [], 'ko', markersize=4)
+
+    def init():
+        traj_line.set_data([], [])
+        current_point.set_data([], [])
+        return traj_line, current_point
+
+    def update(frame_index):
+        t_frame = frame_times[frame_index]
+        indices = np.where(tiempos <= t_frame)[0]
+        traj_line.set_data(x_total[indices], y_total[indices])
+        if indices.size > 0:
+            current_point.set_data([x_total[indices[-1]]], [y_total[indices[-1]]])
+        return traj_line, current_point
+
+    ani = FuncAnimation(fig, update, frames=len(frame_times), init_func=init, blit=True, repeat=False)
+    ani.save(nombre_archivo, writer=PillowWriter(fps=24))
+    print('GIF guardado como', nombre_archivo)
+
+
 # -----------------------------
 # Trayectoria principal
 # -----------------------------
 def trayectoria(max_step, verify=False):
     """Ejecuta la simulación con paso máximo dado."""
+    start_time = time.time()
     h_apogee = 37000
     h_perigee = 1200
     r_apogee = rearth + h_apogee
@@ -221,8 +279,11 @@ def trayectoria(max_step, verify=False):
     )
     t4 = sol4.t[-1]
     f4 = sol4.y[:, -1]
+    elapsed = time.time() - start_time
     if verify:
         print_state(4, t4, f4)
+        print(f'transferencia completa: {elapsed:.2f}s')
+        animar_trayectoria_dual([sol1, sol2, sol3, sol4], sol1.t[-1])
 
     return f4
 
