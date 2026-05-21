@@ -510,7 +510,10 @@ fn run(max_step_arg: f64, verify: bool) !void {
     ig.max_step = @min(100, max_step_arg);
     const r4 = integrateUntil(&ig, t3 + 20 * days, &[_]Event{});
     const t4 = r4.event_time;
-    if (verify) printState(4, t4, ig.state);
+    if (verify) {
+        printState(4, t4, ig.state);
+        stdout.print("num steps={d}\n", .{ig.step_count});
+    }
 }
 
 pub fn main(init: std.process.Init) !void {

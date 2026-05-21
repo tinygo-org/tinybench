@@ -39,8 +39,9 @@ const (
 
 // Physical constants.
 var (
-	nS = math.Sqrt(muS / (rB2S * rB2S * rB2S)) // [rad/s] Sun mean motion
-	W  = math.Sqrt(mu / (r12 * r12 * r12))     // [rad/s] Angular velocity of rotating frame
+	nS    = math.Sqrt(muS / (rB2S * rB2S * rB2S)) // [rad/s] Sun mean motion
+	W     = math.Sqrt(mu / (r12 * r12 * r12))     // [rad/s] Angular velocity of rotating frame\
+	sqrt5 = math.Sqrt(5)                          // sqrt(5)
 )
 
 func main() {
@@ -55,14 +56,17 @@ func main() {
 		os.Exit(1)
 	}
 	verify := len(os.Args) == 3 && os.Args[2] == "v"
-	err = run(maxStep, verify)
+	// store makes the integrator store the state of the simulation
+	// This matches python solve_ivp behaviour so they are comparable.
+	store := len(os.Args) == 3 && os.Args[2] == "s"
+	err = run(maxStep, verify, store)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 }
 
-func run(maxStep float64, verify bool) error {
+func run(maxStep float64, verify, store bool) error {
 	cfg := GTOConfig{
 		HApogee:   37000,
 		HPerigee:  1200,
@@ -82,6 +86,11 @@ func run(maxStep float64, verify bool) error {
 		MaxStep: min(450, maxStep),
 		ATol:    cfg.Tol,
 		RTol:    1e-9,
+	}
+	if store {
+		size := min(int(60*24*60*60/ig.MaxStep), 8_000_000) // Guess 2 month mission duration.
+		ig.StoreResult = make([]State, 0, size)
+		ig.StoreTime = make([]float64, 0, size)
 	}
 	if verify {
 		printState(0, 0, ig.State)
@@ -124,6 +133,7 @@ func run(maxStep float64, verify bool) error {
 	_, t4 := ig.IntegrateUntil(t3 + 20*days)
 	if verify {
 		printState(4, t4, ig.State)
+		fmt.Printf("num steps=%d\n", ig.StepCount)
 	}
 	return nil
 }
@@ -398,6 +408,9 @@ type Integrator struct {
 	// Diagnostics
 	LastErrNorm float64 // error norm from most recent accepted step
 	StepCount   int     // incremented on each accepted step
+	// if store is non-nil then results will be appended.
+	StoreResult []State
+	StoreTime   []float64
 }
 
 // Dormand-Prince coefficients (RK45)
@@ -525,7 +538,7 @@ func (ig *Integrator) Step(h float64) float64 {
 			(errVel.X/scVX)*(errVel.X/scVX) +
 			(errVel.Y/scVY)*(errVel.Y/scVY) +
 			(errM/scaleM)*(errM/scaleM)
-		errNorm := math.Sqrt(sumSq) / math.Sqrt(5)
+		errNorm := math.Sqrt(sumSq) / sqrt5
 
 		// Step accepted?
 		if errNorm <= 1 {
@@ -533,7 +546,10 @@ func (ig *Integrator) Step(h float64) float64 {
 			ig.State = State{Pos: newPos, Vel: newVel, Mass: newM}
 			ig.LastErrNorm = errNorm
 			ig.StepCount++
-
+			if ig.StoreResult != nil {
+				ig.StoreResult = append(ig.StoreResult, ig.State)
+				ig.StoreTime = append(ig.StoreTime, tNext)
+			}
 			if errNorm == 0 {
 				return math.Min(hEff*maxFac, ig.MaxStep)
 			}
