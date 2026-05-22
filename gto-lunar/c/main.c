@@ -538,8 +538,10 @@ static int run(double lowerBoundStep, int verify) {
     ig.MaxStep  = fmin(100.0, lowerBoundStep);
     double t4;
     IntegrateUntil(&ig, t3 + 20*days, NULL, 0, &t4);
-    if (verify)
+    if (verify) {
         printState(4, t4, ig.State);
+        printf("num steps=%d\n", ig.StepCount);
+    }
 
     return 0;
 }

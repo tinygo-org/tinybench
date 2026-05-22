@@ -565,7 +565,10 @@ fn run(lower_bound_step: f64, verify: bool, pc: PhysConsts) -> Result<(), &'stat
     ig.rates    = RatesMode::Coast;
     ig.max_step = 100.0_f64.min(lower_bound_step);
     let (_, t4) = integrate_until(&mut ig, t3 + 20.0 * DAYS, &[]);
-    if verify { print_state(4, t4, ig.state); }
+    if verify {
+        print_state(4, t4, ig.state);
+        println!("num steps={}", ig.step_count);
+    }
 
     Ok(())
 }

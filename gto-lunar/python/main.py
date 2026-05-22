@@ -290,6 +290,7 @@ def trayectoria(max_step, verify=False):
     elapsed = time.time() - start_time
     if verify:
         print_state(4, t4, f4)
+        print(f"num steps={len(sol1.t)+len(sol2.t)+len(sol3.t)+len(sol4.t)-4}") # includes initial state which is not a step.
         if sys.argv[2] == 'vv':
             print(f'transferencia completa: {elapsed:.2f}s')
             animar_trayectoria_dual([sol1, sol2, sol3, sol4], sol1.t[-1])
