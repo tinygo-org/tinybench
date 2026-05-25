@@ -173,63 +173,6 @@ func (cfg *GTOConfig) GTOInitialState() State {
 	}
 }
 
-// SelectInitialStep computes a safe first step size following Hairer, Norsett
-// & Wanner §II.4 — the same algorithm used by scipy's select_initial_step.
-// Uses per-component scaling (sc_i = ATol + |y_i|·RTol) unlike Step() which
-// uses vector-norm scaling; this matches scipy's step-size controller exactly.
-func (ig *Integrator) SelectInitialStep() float64 {
-	const (
-		errOrder = 4.0 // RK45 error-estimator order (scipy: error_estimator_order)
-		nComp    = 5.0 // active state components for this 2D problem: x,y,vx,vy,m
-		// (z and vz are always 0; including them would dilute the rms by sqrt(5/7)
-		// and shift the initial h ~3.4% away from scipy's value)
-	)
-	s := ig.State
-	dPos0, dVel0, dm0 := ig.Rates(ig.T, s, ig.PhiS0)
-
-	// Per-component scale factors.
-	atol, rtol := ig.ATol, ig.RTol
-	sc := [7]float64{
-		atol + math.Abs(s.Pos.X)*rtol, atol + math.Abs(s.Pos.Y)*rtol, atol + math.Abs(s.Pos.Z)*rtol,
-		atol + math.Abs(s.Vel.X)*rtol, atol + math.Abs(s.Vel.Y)*rtol, atol + math.Abs(s.Vel.Z)*rtol,
-		atol + math.Abs(s.Mass)*rtol,
-	}
-	rmsNorm := func(px, py, pz, vx, vy, vz, m float64) float64 {
-		return math.Sqrt((px*px + py*py + pz*pz + vx*vx + vy*vy + vz*vz + m*m) / nComp)
-	}
-
-	d0 := rmsNorm(s.Pos.X/sc[0], s.Pos.Y/sc[1], s.Pos.Z/sc[2],
-		s.Vel.X/sc[3], s.Vel.Y/sc[4], s.Vel.Z/sc[5], s.Mass/sc[6])
-	d1 := rmsNorm(dPos0.X/sc[0], dPos0.Y/sc[1], dPos0.Z/sc[2],
-		dVel0.X/sc[3], dVel0.Y/sc[4], dVel0.Z/sc[5], dm0/sc[6])
-
-	var h0 float64
-	if d0 < 1e-5 || d1 < 1e-5 {
-		h0 = 1e-6
-	} else {
-		h0 = 0.01 * d0 / d1
-	}
-
-	// One explicit Euler probe step to estimate second derivative.
-	s1 := State{
-		Pos:  v3Add(s.Pos, v3Scale(h0, dPos0)),
-		Vel:  v3Add(s.Vel, v3Scale(h0, dVel0)),
-		Mass: s.Mass + h0*dm0,
-	}
-	dPos1, dVel1, dm1 := ig.Rates(ig.T+h0, s1, ig.PhiS0)
-	ddPos, ddVel, ddm := v3Sub(dPos1, dPos0), v3Sub(dVel1, dVel0), dm1-dm0
-	d2 := rmsNorm(ddPos.X/sc[0], ddPos.Y/sc[1], ddPos.Z/sc[2],
-		ddVel.X/sc[3], ddVel.Y/sc[4], ddVel.Z/sc[5], ddm/sc[6]) / h0
-
-	var h1 float64
-	if maxD := math.Max(d1, d2); maxD <= 1e-5 {
-		h1 = math.Max(1e-6, h0*1e-3)
-	} else {
-		h1 = math.Pow(0.01/maxD, 1/(errOrder+1))
-	}
-	return math.Min(100*h0, h1)
-}
-
 // RatesThrustEM returns a RatesFunc for prograde thrust in Earth+Moon CR3BP.
 //
 //	ax = 2*W*vy + W²*x - mu1*(x-x1)/r1³ - mu2*(x-x2)/r2³ + (T/m)*(vx/v)
@@ -313,25 +256,6 @@ func gravity(x, y float64) (r1_3, r2_3 float64) {
 	r1 := math.Sqrt(dx1*dx1 + y*y)
 	r2 := math.Sqrt(dx2*dx2 + y*y)
 	return r1 * r1 * r1, r2 * r2 * r2
-}
-
-type Vec struct {
-	X, Y, Z float64
-}
-
-func v3Norm2(v Vec) float64        { return v.X*v.X + v.Y*v.Y + v.Z*v.Z }
-func v3Norm(v Vec) float64         { return math.Hypot(v.X, math.Hypot(v.Y, v.Z)) }
-func v3Sub(a, b Vec) Vec           { return Vec{X: a.X - b.X, Y: a.Y - b.Y, Z: a.Z - b.Z} }
-func v3Add(a, b Vec) Vec           { return Vec{X: a.X + b.X, Y: a.Y + b.Y, Z: a.Z + b.Z} }
-func v3Scale(f float64, v Vec) Vec { return Vec{X: f * v.X, Y: f * v.Y, Z: f * v.Z} }
-
-// fma3 computes a*b+c using math.FMA per component.
-func v3FMA(a float64, b, c Vec) Vec {
-	return Vec{
-		X: math.FMA(a, b.X, c.X),
-		Y: math.FMA(a, b.Y, c.Y),
-		Z: math.FMA(a, b.Z, c.Z),
-	}
 }
 
 // State represents spacecraft state in the rotating Earth-Moon frame.
@@ -444,6 +368,63 @@ var (
 		-1.0 / 40,
 	}
 )
+
+// SelectInitialStep computes a safe first step size following Hairer, Norsett
+// & Wanner §II.4 — the same algorithm used by scipy's select_initial_step.
+// Uses per-component scaling (sc_i = ATol + |y_i|·RTol) unlike Step() which
+// uses vector-norm scaling; this matches scipy's step-size controller exactly.
+func (ig *Integrator) SelectInitialStep() float64 {
+	const (
+		errOrder = 4.0 // RK45 error-estimator order (scipy: error_estimator_order)
+		nComp    = 5.0 // active state components for this 2D problem: x,y,vx,vy,m
+		// (z and vz are always 0; including them would dilute the rms by sqrt(5/7)
+		// and shift the initial h ~3.4% away from scipy's value)
+	)
+	s := ig.State
+	dPos0, dVel0, dm0 := ig.Rates(ig.T, s, ig.PhiS0)
+
+	// Per-component scale factors.
+	atol, rtol := ig.ATol, ig.RTol
+	sc := [7]float64{
+		atol + math.Abs(s.Pos.X)*rtol, atol + math.Abs(s.Pos.Y)*rtol, atol + math.Abs(s.Pos.Z)*rtol,
+		atol + math.Abs(s.Vel.X)*rtol, atol + math.Abs(s.Vel.Y)*rtol, atol + math.Abs(s.Vel.Z)*rtol,
+		atol + math.Abs(s.Mass)*rtol,
+	}
+	rmsNorm := func(px, py, pz, vx, vy, vz, m float64) float64 {
+		return math.Sqrt((px*px + py*py + pz*pz + vx*vx + vy*vy + vz*vz + m*m) / nComp)
+	}
+
+	d0 := rmsNorm(s.Pos.X/sc[0], s.Pos.Y/sc[1], s.Pos.Z/sc[2],
+		s.Vel.X/sc[3], s.Vel.Y/sc[4], s.Vel.Z/sc[5], s.Mass/sc[6])
+	d1 := rmsNorm(dPos0.X/sc[0], dPos0.Y/sc[1], dPos0.Z/sc[2],
+		dVel0.X/sc[3], dVel0.Y/sc[4], dVel0.Z/sc[5], dm0/sc[6])
+
+	var h0 float64
+	if d0 < 1e-5 || d1 < 1e-5 {
+		h0 = 1e-6
+	} else {
+		h0 = 0.01 * d0 / d1
+	}
+
+	// One explicit Euler probe step to estimate second derivative.
+	s1 := State{
+		Pos:  v3Add(s.Pos, v3Scale(h0, dPos0)),
+		Vel:  v3Add(s.Vel, v3Scale(h0, dVel0)),
+		Mass: s.Mass + h0*dm0,
+	}
+	dPos1, dVel1, dm1 := ig.Rates(ig.T+h0, s1, ig.PhiS0)
+	ddPos, ddVel, ddm := v3Sub(dPos1, dPos0), v3Sub(dVel1, dVel0), dm1-dm0
+	d2 := rmsNorm(ddPos.X/sc[0], ddPos.Y/sc[1], ddPos.Z/sc[2],
+		ddVel.X/sc[3], ddVel.Y/sc[4], ddVel.Z/sc[5], ddm/sc[6]) / h0
+
+	var h1 float64
+	if maxD := math.Max(d1, d2); maxD <= 1e-5 {
+		h1 = math.Max(1e-6, h0*1e-3)
+	} else {
+		h1 = math.Pow(0.01/maxD, 1/(errOrder+1))
+	}
+	return math.Min(100*h0, h1)
+}
 
 // Step performs a single RK45 step with adaptive step size.
 // Returns the new suggested step size.
@@ -657,3 +638,13 @@ func bisectEvent(t0, t1 float64, s0, s1 State, phiS0 float64, ev EventFunc) floa
 
 	return 0.5 * (t0 + t1)
 }
+
+type Vec struct {
+	X, Y, Z float64
+}
+
+func v3Norm2(v Vec) float64        { return v.X*v.X + v.Y*v.Y + v.Z*v.Z }
+func v3Norm(v Vec) float64         { return math.Hypot(v.X, math.Hypot(v.Y, v.Z)) }
+func v3Sub(a, b Vec) Vec           { return Vec{X: a.X - b.X, Y: a.Y - b.Y, Z: a.Z - b.Z} }
+func v3Add(a, b Vec) Vec           { return Vec{X: a.X + b.X, Y: a.Y + b.Y, Z: a.Z + b.Z} }
+func v3Scale(f float64, v Vec) Vec { return Vec{X: f * v.X, Y: f * v.Y, Z: f * v.Z} }
