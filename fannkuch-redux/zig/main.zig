@@ -44,7 +44,7 @@ const Fannkuchen = struct {
     }
 
     fn tk(self: *Fannkuchen) void {
-        var c: [16]i64 = [_]i64{0} ** 16;
+        var c: [16]i64 = @splat(0);
         var i: usize = 0;
 
         while (i < self.max_n) {
