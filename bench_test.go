@@ -208,8 +208,9 @@ func setup() (benchnames []string) {
 	return benchnames
 }
 
-// parseNExtSemanticVersion parses the first instance of anything that looks remotely close to a semantic version in the argument string
-// and returns the major, minor and patch version as integers.
+// parseNextSemanticVersion parses the first instance of anything that looks remotely close to a semantic version in the argument string
+// and returns the major, minor and patch version as integers. The patch version is optional
+// and defaults to zero, as in versions such as "go1.27".
 func parseNextSemanticVersion(s string) (int, int, int, bool) {
 	firstDotIdx := strings.IndexByte(s, '.')
 	if firstDotIdx <= 0 {
@@ -229,12 +230,12 @@ func parseNextSemanticVersion(s string) (int, int, int, bool) {
 		i++
 	}
 	secondDotIdx := i
-	if s[secondDotIdx] != '.' {
-		return -1, -1, -1, false
-	}
 	vMinor, err := strconv.Atoi(s[firstDotIdx+1 : secondDotIdx])
 	if err != nil {
 		return -1, -1, -1, false
+	}
+	if secondDotIdx >= len(s) || s[secondDotIdx] != '.' {
+		return vMajor, vMinor, 0, true // No patch version, i.e: "go1.27".
 	}
 	i = secondDotIdx + 1
 	for i < len(s) && isDigit(s[i]) {
@@ -242,7 +243,7 @@ func parseNextSemanticVersion(s string) (int, int, int, bool) {
 	}
 	vPatch, err := strconv.Atoi(s[secondDotIdx+1 : i])
 	if err != nil {
-		return -1, -1, -1, false
+		return vMajor, vMinor, 0, true // Trailing dot with no patch digits.
 	}
 	return vMajor, vMinor, vPatch, true
 }
