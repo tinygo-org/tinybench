@@ -299,7 +299,7 @@ func parseBenchRaw(r io.Reader) (benchs []rawCompilerResult, err error) {
 			}
 			continue
 		}
-		isRecord := strings.HasPrefix(orig, "BenchmarkAll/") && strings.HasSuffix(orig, "ns/op\n")
+		isRecord := strings.HasPrefix(orig, "BenchmarkAll/") && strings.Contains(orig, " ns/op")
 		if !isRecord {
 			continue
 		} else if currentBench == nil {
@@ -314,7 +314,8 @@ func parseBenchRaw(r io.Reader) (benchs []rawCompilerResult, err error) {
 			compiler, _, _ = strings.Cut(compiler, "-")
 		}
 		numbers := strings.Fields(data)
-		if len(numbers) != 3 {
+		// Lines may carry extra metrics after ns/op, such as user-ns/op and peak-KiB.
+		if len(numbers) < 3 || len(numbers)%2 == 0 || numbers[2] != "ns/op" {
 			return benchs, fmt.Errorf("malformed benchmark data line %d: %q", line, orig)
 		}
 		N, _ := strconv.Atoi(numbers[0])
