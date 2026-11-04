@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 )
 
 type Compiler struct {
@@ -159,12 +160,14 @@ func BenchmarkAll(b *testing.B) {
 func runBench(b *testing.B, name, binary string, benchFlags []string, ensureCompile func(b *testing.B)) {
 	b.Helper()
 	b.Run(name, func(b *testing.B) {
-		var err error
 		b.StopTimer()
 		ensureCompile(b)
 		b.StartTimer()
+		var user, sys time.Duration
+		var peakKB int64
 		for i := 0; i < b.N; i++ {
-			err = exec.Command(binary, benchFlags...).Run()
+			cmd := exec.Command(binary, benchFlags...)
+			err := cmd.Run()
 			if err != nil {
 				out, err2 := exec.Command(binary, benchFlags...).CombinedOutput()
 				if err2 != nil {
@@ -175,6 +178,14 @@ func runBench(b *testing.B, name, binary string, benchFlags []string, ensureComp
 				}
 				b.Fatalf("running program %s: %s", name, err)
 			}
+			user += cmd.ProcessState.UserTime()
+			sys += cmd.ProcessState.SystemTime()
+			peakKB = max(peakKB, peakRSSKB(cmd.ProcessState))
+		}
+		b.ReportMetric(float64(user.Nanoseconds())/float64(b.N), "user-ns/op")
+		b.ReportMetric(float64(sys.Nanoseconds())/float64(b.N), "sys-ns/op")
+		if peakKB > 0 {
+			b.ReportMetric(float64(peakKB), "peak-KiB")
 		}
 	})
 }
